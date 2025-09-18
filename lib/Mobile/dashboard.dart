@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:foodtracker_firebase/Dashboard_Widget/ImageSlider.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:foodtracker_firebase/Dashboard_Widget/bottomNav.dart';
+import 'package:foodtracker_firebase/Dashboard_Widget/foodDescription.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -15,31 +16,60 @@ class _DashboardState extends State<Dashboard> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
+        elevation: 0,
+        toolbarHeight: 100,
         backgroundColor: const Color(0xff213448),
-        toolbarHeight: 100, // makes the AppBar taller
         title: Padding(
-          padding: const EdgeInsets.only(left: 50.0, right: 30.0, top: 10.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                "Dashboard",
-                style: TextStyle(
-                  fontFamily: 'Montserrat',
-                  color: Colors.white,
-                  fontSize: 30,
-                  fontWeight: FontWeight.w500,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text(
+                    "Dashboard",
+                    style: TextStyle(
+                      fontFamily: 'Montserrat',
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    "Welcome back 👋",
+                    style: TextStyle(
+                      fontFamily: 'Montserrat',
+                      color: Colors.white70,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
               ),
-              CircleAvatar(
-                radius: 28, // make avatar larger to match new size
-                backgroundColor: const Color(0xffEEF3D2),
-                child: ClipOval(
-                  child: Image.asset(
-                    'images/foodtracker.jpg',
-                    width: 25,
-                    height: 25,
-                    fit: BoxFit.contain,
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white70, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: CircleAvatar(
+                  radius: 28,
+                  backgroundColor: const Color(0xffEEF3D2),
+                  child: ClipOval(
+                    child: Image.asset(
+                      'images/foodtracker.jpg',
+                      width: 40,
+                      height: 40,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
               ),
@@ -47,7 +77,6 @@ class _DashboardState extends State<Dashboard> {
           ),
         ),
       ),
-
       body: Container(
         width: double.infinity,
         height: MediaQuery.of(context).size.height,
@@ -58,43 +87,121 @@ class _DashboardState extends State<Dashboard> {
             end: Alignment.bottomCenter,
           ),
         ),
-        child: Column(children: const [SizedBox(height: 20), Imageslider()]),
-      ),
-
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xff213448), Color(0xff213448)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
-          child: GNav(
-            backgroundColor: Colors.transparent,
-            color: Colors.white,
-            tabBackgroundColor: const Color(0xff94b4c1),
-            activeColor: Colors.white,
-            gap: 30,
-            padding: const EdgeInsets.all(16),
-            tabs: [
-              GButton(icon: Icons.home, text: 'Home'),
-              GButton(icon: Icons.trending_up, text: 'Trending'),
-              GButton(
-                onPressed: () {},
-                icon: Icons.location_on,
-
-                iconActiveColor: const Color.fromARGB(255, 255, 255, 255),
-                iconSize: 52,
+        child: ListView(
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          children: [
+            const ImageSlider(),
+            const SizedBox(height: 20),
+            const Text(
+              'Recommended Meals',
+              style: TextStyle(
+                fontFamily: 'Montserrat',
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
-              GButton(icon: Icons.notifications, text: 'Notifications'),
-              GButton(icon: Icons.person, text: 'Profile'),
-            ],
-          ),
+            ),
+            const SizedBox(height: 10),
+
+            // 🔹 Meal 1
+            Card(
+              color: const Color(0xff2f4a5d),
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: ListTile(
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    'images/food1.jpg',
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                title: const Text(
+                  'Grilled Chicken Salad',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: const Text(
+                  'Fresh greens with protein',
+                  style: TextStyle(color: Colors.white70),
+                ),
+                // only the icon pushes the next page
+                trailing: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white54,
+                    size: 16,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Fooddescription(),
+                      ),
+                    );
+                  },
+                ),
+                // no onTap here: tapping card DOES NOTHING
+              ),
+            ),
+
+            // 🔹 Meal 2
+            Card(
+              color: const Color(0xff2f4a5d),
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: ListTile(
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    'images/food2.jpg',
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                title: const Text(
+                  'Avocado Toast',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: const Text(
+                  'Simple and nutritious',
+                  style: TextStyle(color: Colors.white70),
+                ),
+                trailing: IconButton(
+                  icon: const Icon(
+                    Icons.arrow_forward_ios,
+                    color: Colors.white54,
+                    size: 16,
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Fooddescription(),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+
+            // 🔹 Add more manually below...
+          ],
         ),
       ),
+      bottomNavigationBar: const ButtomNavbar(),
     );
   }
 }
