@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:foodtracker_firebase/Mobile/dashboard.dart';
+import 'package:foodtracker_firebase/Mobile/Mainframe.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -39,7 +39,7 @@ class _LoginState extends State<Login> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const Dashboard()),
+          MaterialPageRoute(builder: (context) => const Mainframe()),
         );
       });
     }
@@ -67,7 +67,7 @@ class _LoginState extends State<Login> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Dashboard()),
+        MaterialPageRoute(builder: (context) => const Mainframe()),
       );
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);

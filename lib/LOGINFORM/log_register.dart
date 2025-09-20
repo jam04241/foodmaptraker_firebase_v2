@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:foodtracker_firebase/LOGINFORM/login.dart';
-import 'package:foodtracker_firebase/LOGINFORM/register.dart';
+import 'package:foodtracker_firebase/Loginform/login.dart';
+import 'package:foodtracker_firebase/Loginform/register.dart';
 
 class LoginDesign extends StatelessWidget {
   const LoginDesign({super.key});
