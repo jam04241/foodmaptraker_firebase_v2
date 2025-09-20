@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:foodtracker_firebase/Mobile/Trendings.dart';
+import 'package:foodtracker_firebase/Mobile/dashboard.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 
 class ButtomNavbar extends StatefulWidget {
@@ -29,8 +31,26 @@ class _ButtomNavbarState extends State<ButtomNavbar> {
           gap: 30,
           padding: const EdgeInsets.all(16),
           tabs: [
-            GButton(icon: Icons.home, text: 'Home'),
-            GButton(icon: Icons.trending_up, text: 'Trending'),
+            GButton(
+              icon: Icons.home,
+              text: 'Home',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Dashboard()),
+                );
+              },
+            ),
+            GButton(
+              icon: Icons.trending_up,
+              text: 'Trending',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => Trendings()),
+                );
+              },
+            ),
             GButton(
               icon: Icons.location_on,
               iconActiveColor: Colors.white,
