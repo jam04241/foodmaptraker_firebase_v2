@@ -16,6 +16,132 @@ class _TrendingsState extends State<NavTrendingPage> {
     super.dispose();
   }
 
+  void openPostModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          initialChildSize: 0.7,
+          minChildSize: 0.4,
+          maxChildSize: 0.95,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  // 🔹 Header
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Create Post",
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 🔹 Input + Uploads
+                  Expanded(
+                    child: ListView(
+                      controller: scrollController,
+                      padding: const EdgeInsets.all(16),
+                      children: [
+                        TextField(
+                          controller: postController,
+                          maxLines: 5,
+                          decoration: InputDecoration(
+                            hintText: "What's on your mind?",
+                            filled: true,
+                            fillColor: const Color(0xfff0f0f0),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: () {},
+                              icon: const Icon(Icons.image),
+                              label: const Text("Add Photo"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF213448),
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            ElevatedButton.icon(
+                              onPressed: () {},
+                              icon: const Icon(Icons.videocam),
+                              label: const Text("Add Video"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF213448),
+                                foregroundColor: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // 🔹 Bottom Post Button
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF547792),
+
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () {
+                          // Save or post logic here
+                          Navigator.pop(context);
+                        },
+                        child: const Text(
+                          "Post",
+                          style: TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,7 +161,7 @@ class _TrendingsState extends State<NavTrendingPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
                   Text(
-                    "NavTrendingPage",
+                    "Trendings",
                     style: TextStyle(
                       fontFamily: 'Montserrat',
                       color: Colors.white,
@@ -86,26 +212,30 @@ class _TrendingsState extends State<NavTrendingPage> {
                         ),
                       ),
                       const SizedBox(width: 12),
-
-                      // Editable TextField
                       Expanded(
-                        child: TextField(
-                          controller: postController,
-                          maxLines: null,
-                          decoration: InputDecoration(
-                            hintText: "What's on your mind?",
-                            filled: true,
-                            fillColor: const Color(0xfff0f0f0),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 10,
+                        child: SizedBox(
+                          height: 50,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xfff0f0f0),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
+                            onPressed: () => openPostModal(context),
+                            child: const Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "What's on your mind?",
+                                style: TextStyle(
+                                  fontFamily: 'Montserrat',
+                                  fontSize: 14,
+                                  color: Colors.black54,
+                                ),
+                              ),
                             ),
                           ),
-                          style: const TextStyle(fontSize: 14),
                         ),
                       ),
                     ],

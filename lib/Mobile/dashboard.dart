@@ -196,8 +196,6 @@ class _NavDashboardPageState extends State<NavDashboardPage> {
                 ),
               ),
             ),
-
-            // 🔹 Add more manually below...
           ],
         ),
       ),
