@@ -135,7 +135,7 @@ class _FooddescriptionState extends State<Fooddescription> {
               ),
             ),
             const SizedBox(height: 20),
-            Divider(color: Colors.cyanAccent),
+            Divider(color: Colors.black),
 
             const SizedBox(height: 30),
             Padding(
