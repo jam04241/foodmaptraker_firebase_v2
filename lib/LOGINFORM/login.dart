@@ -1,11 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-import 'package:foodtracker_firebase/Mobile/dashboard.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-=======
 import 'package:foodtracker_firebase/Mobile/Mainframe.dart';
->>>>>>> naquila
 
 class Login extends StatefulWidget {
   const Login({super.key});
