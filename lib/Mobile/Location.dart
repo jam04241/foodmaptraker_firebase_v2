@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:foodtracker_firebase/Properties/locationAssets/foodLocation.dart';
 import 'package:latlong2/latlong.dart';
 
 class NavLocationPage extends StatefulWidget {
@@ -22,16 +23,19 @@ class _NavLocationPageState extends State<NavLocationPage> {
           FlutterMap(
             mapController: _mapController,
             options: const MapOptions(
-              initialCenter: LatLng(0, 0),
-              initialZoom: 2,
-              minZoom: 0,
-              maxZoom: 100,
+              initialCenter: LatLng(7.082414628289476, 125.61406854129964),
+              initialZoom: 16,
+              minZoom: 2,
+              maxZoom: 19,
             ),
             children: [
               TileLayer(
                 urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
                 userAgentPackageName: 'com.example.app',
               ),
+
+              // 🔹 Call Markerlayer here
+              foodLocationMarker(context),
             ],
           ),
 
