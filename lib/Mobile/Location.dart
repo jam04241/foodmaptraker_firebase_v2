@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:foodtracker_firebase/Properties/dashboardAssets/ImageSlider.dart';
 import 'package:foodtracker_firebase/Properties/dashboardAssets/foodDescription.dart';
 
-class NavDashboardPage extends StatefulWidget {
-  const NavDashboardPage({super.key});
+class NavLocationPage extends StatefulWidget {
+  const NavLocationPage({super.key});
 
   @override
-  State<NavDashboardPage> createState() => _NavDashboardPageState();
+  State<NavLocationPage> createState() => _NavLocationPageState();
 }
 
-class _NavDashboardPageState extends State<NavDashboardPage> {
+class _NavLocationPageState extends State<NavLocationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
