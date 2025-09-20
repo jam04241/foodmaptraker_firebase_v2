@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:foodtracker_firebase/LOGINFORM/login.dart';
-import 'package:foodtracker_firebase/Mobile/dashboard.dart';
+import 'package:foodtracker_firebase/Loginform/login.dart';
+import 'package:foodtracker_firebase/Mobile/Mainframe.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class Authenticator extends StatefulWidget {
@@ -22,7 +22,7 @@ class _AuthenticatorState extends State<Authenticator> {
           } else if (snapshot.hasError) {
             return const Center(child: Text("Something went wrong"));
           } else if (snapshot.hasData) {
-            return const Dashboard();
+            return const Mainframe();
           } else {
             return const Login();
           }

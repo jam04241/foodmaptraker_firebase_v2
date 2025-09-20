@@ -1,7 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:foodtracker_firebase/Mobile/dashboard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+=======
+import 'package:foodtracker_firebase/Mobile/Mainframe.dart';
+>>>>>>> naquila
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -30,7 +34,7 @@ class _LoginState extends State<Login> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const Dashboard()),
+          MaterialPageRoute(builder: (context) => const Mainframe()),
         );
       });
     }
@@ -63,7 +67,7 @@ class _LoginState extends State<Login> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Dashboard()),
+        MaterialPageRoute(builder: (context) => const Mainframe()),
       );
     } on FirebaseAuthException catch (e) {
       if (mounted) Navigator.pop(context);
