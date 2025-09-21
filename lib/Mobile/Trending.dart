@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:foodtracker_firebase/Properties/trendingAsset/post_modal.dart';
+import 'package:foodtracker_firebase/Properties/trendingAsset/review_modal.dart';
+import 'package:foodtracker_firebase/Properties/trendingAsset/trending_card.dart';
 
 class NavTrendingPage extends StatefulWidget {
   const NavTrendingPage({super.key});
@@ -10,135 +13,91 @@ class NavTrendingPage extends StatefulWidget {
 class _TrendingsState extends State<NavTrendingPage> {
   final TextEditingController postController = TextEditingController();
 
+  final List<Map<String, dynamic>> posts = [
+    {
+      "username": "Alice",
+      "location": "Manila, Philippines",
+      "profileImage": "https://randomuser.me/api/portraits/women/44.jpg",
+      "restaurant": "Ichiran Ramen",
+      "restaurantImages": [
+        "https://images.unsplash.com/photo-1606755962773-0c5a3e5f3a3e",
+        "https://images.unsplash.com/photo-1553621042-f6e147245754",
+        "https://images.unsplash.com/photo-1543353071-873f17a7a088",
+      ],
+      "caption": "Best ramen I’ve had 🍜🔥",
+      "rating": 4.7,
+      "views": 123,
+      "comment": "",
+    },
+    {
+      "username": "Bob",
+      "location": "Cebu City",
+      "profileImage": "https://randomuser.me/api/portraits/men/36.jpg",
+      "restaurant": "Lantaw Native Restaurant",
+      "restaurantImages": [
+        "https://images.unsplash.com/photo-1528605248644-14dd04022da1",
+        "https://images.unsplash.com/photo-1529042410759-befb1204b468",
+      ],
+      "caption": "Chill vibes, good food 😋",
+      "rating": 4.3,
+      "views": 98,
+      "comment": "",
+    },
+    {
+      "username": "Carla",
+      "location": "Davao City",
+      "profileImage": "https://randomuser.me/api/portraits/women/65.jpg",
+      "restaurant": "Yellow Fin Seafood",
+      "restaurantImages": [
+        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
+        "https://images.unsplash.com/photo-1543351611-58f69d8c8c2d",
+      ],
+      "caption": "Fresh seafood, highly recommended 🐟🦐",
+      "rating": 4.8,
+      "views": 210,
+      "comment": "",
+    },
+  ];
+
   @override
   void dispose() {
     postController.dispose();
     super.dispose();
   }
 
+  // Open Post Modal
   void openPostModal(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) {
-        return DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.7,
-          minChildSize: 0.4,
-          maxChildSize: 0.95,
-          builder: (context, scrollController) {
-            return Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              child: Column(
-                children: [
-                  // 🔹 Header
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          "Create Post",
-                          style: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                      ],
-                    ),
-                  ),
+      builder: (context) => PostModal(postController: postController),
+    );
+  }
 
-                  // 🔹 Input + Uploads
-                  Expanded(
-                    child: ListView(
-                      controller: scrollController,
-                      padding: const EdgeInsets.all(16),
-                      children: [
-                        TextField(
-                          controller: postController,
-                          maxLines: 5,
-                          decoration: InputDecoration(
-                            hintText: "What's on your mind?",
-                            filled: true,
-                            fillColor: const Color(0xfff0f0f0),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Row(
-                          children: [
-                            ElevatedButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.image),
-                              label: const Text("Add Photo"),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xFF213448),
-                                foregroundColor: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            ElevatedButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.videocam),
-                              label: const Text("Add Video"),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xFF213448),
-                                foregroundColor: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+  // Open Review Modal
+  void openCommentModal(BuildContext context, int index) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ReviewModal(
+        restaurantName: posts[index]["restaurant"],
+        onSubmit: (rating, comment) {
+          setState(() {
+            posts[index]["rating"] = rating;
+            posts[index]["comment"] = comment;
+            posts[index]["views"] = (posts[index]["views"] as int) + 1;
+          });
 
-                  // 🔹 Bottom Post Button
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF547792),
-
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: () {
-                          // Save or post logic here
-                          Navigator.pop(context);
-                        },
-                        child: const Text(
-                          "Post",
-                          style: TextStyle(
-                            fontFamily: 'Montserrat',
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("✅ Review submitted successfully!"),
+              backgroundColor: Colors.green,
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -151,34 +110,24 @@ class _TrendingsState extends State<NavTrendingPage> {
         elevation: 0,
         toolbarHeight: 80,
         backgroundColor: const Color(0xff213448),
-        title: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Text(
-                    "Trendings",
-                    style: TextStyle(
-                      fontFamily: 'Montserrat',
-                      color: Colors.white,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+        title: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+          child: Text(
+            "Trending",
+            style: TextStyle(
+              fontFamily: 'Montserrat',
+              color: Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
+            // Create Post Button
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -192,57 +141,52 @@ class _TrendingsState extends State<NavTrendingPage> {
                   ),
                 ],
               ),
-              child: Column(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 🔹 Profile + Input Row
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Profile Icon
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: const Color(0xffdbe7c9),
-                        child: ClipOval(
-                          child: Image.asset(
-                            'images/foodtracker.jpg',
-                            width: 45,
-                            height: 45,
-                            fit: BoxFit.cover,
+                  const CircleAvatar(
+                    radius: 24,
+                    backgroundImage: NetworkImage(
+                      "https://randomuser.me/api/portraits/men/12.jpg",
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: SizedBox(
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xfff0f0f0),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: SizedBox(
-                          height: 50,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xfff0f0f0),
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            onPressed: () => openPostModal(context),
-                            child: const Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                "What's on your mind?",
-                                style: TextStyle(
-                                  fontFamily: 'Montserrat',
-                                  fontSize: 14,
-                                  color: Colors.black54,
-                                ),
-                              ),
+                        onPressed: () => openPostModal(context),
+                        child: const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "What's on your mind?",
+                            style: TextStyle(
+                              fontFamily: 'Montserrat',
+                              fontSize: 14,
+                              color: Colors.black54,
                             ),
                           ),
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
             ),
+
+            // Posts
+            for (int i = 0; i < posts.length; i++)
+              TrendingCard(
+                post: posts[i],
+                onTapComment: () => openCommentModal(context, i),
+              ),
           ],
         ),
       ),
