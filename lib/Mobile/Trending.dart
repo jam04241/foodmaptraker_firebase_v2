@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:foodtracker_firebase/Properties/trendingAsset/post_modal.dart';
-import 'package:foodtracker_firebase/Properties/trendingAsset/review_modal.dart';
-import 'package:foodtracker_firebase/Properties/trendingAsset/trending_card.dart';
+import 'package:foodtracker_firebase/Properties/trendingAssets/post_modal.dart';
+import 'package:foodtracker_firebase/Properties/trendingAssets/review_modal.dart';
+import 'package:foodtracker_firebase/Properties/trendingAssets/trending_card.dart';
 
 class NavTrendingPage extends StatefulWidget {
   const NavTrendingPage({super.key});
@@ -15,38 +15,35 @@ class _TrendingsState extends State<NavTrendingPage> {
 
   final List<Map<String, dynamic>> posts = [
     {
-      "username": "Alice",
-      "location": "Manila, Philippines",
-      "profileImage": "https://randomuser.me/api/portraits/women/44.jpg",
-      "restaurant": "Ichiran Ramen",
+      "username": "Stifin Tatel",
+      "location": "Obrero, Davao City, Philippines",
+      "profileImage": "images/post6.jpg",
+      "restaurant": "Stifin",
       "restaurantImages": [
-        "https://images.unsplash.com/photo-1606755962773-0c5a3e5f3a3e",
-        "https://images.unsplash.com/photo-1553621042-f6e147245754",
-        "https://images.unsplash.com/photo-1543353071-873f17a7a088",
+        "images/coffee1.jpg",
+        "images/coffee2.jpg",
+        "images/coffee3.jpg",
       ],
-      "caption": "Best ramen I’ve had 🍜🔥",
+      "caption": "Best Coffee Cafe Ever🔥",
       "rating": 4.7,
       "views": 123,
       "comment": "",
     },
     {
-      "username": "Bob",
-      "location": "Cebu City",
-      "profileImage": "https://randomuser.me/api/portraits/men/36.jpg",
-      "restaurant": "Lantaw Native Restaurant",
-      "restaurantImages": [
-        "https://images.unsplash.com/photo-1528605248644-14dd04022da1",
-        "https://images.unsplash.com/photo-1529042410759-befb1204b468",
-      ],
+      "username": "Mommy Jupeta",
+      "location": "Obrero, Davao City, Philippines",
+      "profileImage": "images/post6.jpg",
+      "restaurant": "Yummy Stephen Tatel",
+      "restaurantImages": ["images/food1.jpg", "images/food2.jpg"],
       "caption": "Chill vibes, good food 😋",
       "rating": 4.3,
       "views": 98,
       "comment": "",
     },
     {
-      "username": "Carla",
+      "username": "JohnLloyd Girozaga",
       "location": "Davao City",
-      "profileImage": "https://randomuser.me/api/portraits/women/65.jpg",
+      "profileImage": "images/food1.jpg",
       "restaurant": "Yellow Fin Seafood",
       "restaurantImages": [
         "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",

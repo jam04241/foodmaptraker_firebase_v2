@@ -4,7 +4,7 @@ import 'package:foodtracker_firebase/Properties/locationAssets/foodLocation.dart
 import 'package:latlong2/latlong.dart';
 
 class NavLocationPage extends StatefulWidget {
-  const NavLocationPage({Key? key}) : super(key: key);
+  const NavLocationPage({super.key});
 
   @override
   State<NavLocationPage> createState() => _NavLocationPageState();
