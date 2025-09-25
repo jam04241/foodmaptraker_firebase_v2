@@ -1,47 +1,58 @@
 import 'package:flutter/material.dart';
 
-class NotificationBox extends StatefulWidget {
-  const NotificationBox({super.key});
+class NotificationBox extends StatelessWidget {
+  final String profileImage;
+  final String username;
+  final String activity;
+  final String timestamp;
+  // For function in Sort BY: Button
+  final String numseq;
 
-  @override
-  State<NotificationBox> createState() => _NotificationBoxState();
-}
+  const NotificationBox({
+    super.key,
+    required this.profileImage,
+    required this.username,
+    required this.activity,
+    required this.timestamp,
+    required this.numseq,
+  });
 
-class _NotificationBoxState extends State<NotificationBox> {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Color(0xff213448),
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+      color: const Color(0xff2f4a5d),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 2,
       child: ListTile(
-        leading: const CircleAvatar(
-          radius: 25,
-          backgroundImage: AssetImage("images/mommyjupeta.jpg"),
-          // 👉 if you want to test without asset, use:
-          // child: Icon(Icons.person),
+        leading: CircleAvatar(
+          backgroundImage: AssetImage(profileImage),
+          radius: 24,
         ),
-        title: const Text(
-          "Mommy Jupeta",
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        title: Text(
+          username,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Montserrat',
+            color: Colors.white,
+          ),
         ),
-        subtitle: const Text(
-          "Reacted to your review",
-          style: TextStyle(color: Colors.white70),
-        ),
-        trailing: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "11:59",
-              style: TextStyle(fontSize: 12, color: Colors.white54),
-            ),
-            IconButton(
-              icon: const Icon(Icons.more_horiz, color: Colors.white),
-              onPressed: () {
-                // TODO: options here later
-              },
+            Text(activity, style: TextStyle(color: Colors.white70)),
+            const SizedBox(height: 4),
+            Text(
+              timestamp,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
             ),
           ],
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.more_horiz, color: Colors.white),
+          onPressed: () {
+            // 👉 Optional: add popup menu or action here
+          },
         ),
       ),
     );
