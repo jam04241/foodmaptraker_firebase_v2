@@ -1,32 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:foodtracker_firebase/Properties/trendingAssets/post_data.dart';
 
-class TrendingCard extends StatelessWidget {
-  final Map<String, dynamic> post;
-  final VoidCallback onTapComment;
-
-  const TrendingCard({
-    super.key,
-    required this.post,
-    required this.onTapComment,
-  });
+class FavoritePage extends StatefulWidget {
+  const FavoritePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  State<FavoritePage> createState() => _FavoritePageState();
+}
+
+class _FavoritePageState extends State<FavoritePage> {
+  Widget trendingCard(Map<String, dynamic> post) {
     return Container(
       margin: const EdgeInsets.only(top: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // User info row
+          // User Info + Heart
           Row(
             children: [
               CircleAvatar(
@@ -40,51 +38,43 @@ class TrendingCard extends StatelessWidget {
                   Text(
                     post["username"],
                     style: const TextStyle(
-                      fontFamily: 'Montserrat',
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
                   ),
                   Text(
                     post["location"],
-                    style: const TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   Text(
                     post["restaurant"],
                     style: const TextStyle(
-                      fontFamily: 'Montserrat',
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
                     ),
+                  ),
+                  Text(
+                    post["timeAgo"],
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
                   ),
                 ],
               ),
               const Spacer(),
               Row(
                 children: [
-                  const Icon(Icons.favorite, size: 18, color: Colors.red),
+                  const Icon(Icons.favorite, size: 20, color: Colors.red),
                   const SizedBox(width: 4),
                   Text(
-                    "${post["views"]}",
-                    style: const TextStyle(
-                      fontFamily: 'Montserrat',
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
+                    "${post["hearts"]}",
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),
             ],
           ),
-
           const SizedBox(height: 8),
 
-          // ⭐ Rating
+          // Rating
           Row(
             children: [
               RatingBarIndicator(
@@ -93,37 +83,28 @@ class TrendingCard extends StatelessWidget {
                     const Icon(Icons.star, color: Colors.amber),
                 itemCount: 5,
                 itemSize: 20,
-                direction: Axis.horizontal,
               ),
               const SizedBox(width: 8),
               Text(
                 post["rating"].toStringAsFixed(1),
                 style: const TextStyle(
-                  fontFamily: 'Montserrat',
                   fontSize: 13,
-                  color: Colors.black87,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ),
-
           const SizedBox(height: 12),
 
           // Caption
           Text(
             post["caption"],
-            style: const TextStyle(
-              fontFamily: 'Montserrat',
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Colors.black87,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           ),
 
           const SizedBox(height: 12),
 
-          // Restaurant pictures
+          // Images
           if (post["restaurantImages"].isNotEmpty)
             SizedBox(
               height: 160,
@@ -139,47 +120,43 @@ class TrendingCard extends StatelessWidget {
                       width: 220,
                       height: 160,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        width: 220,
-                        height: 160,
-                        color: Colors.grey[300],
-                        child: const Icon(
-                          Icons.broken_image,
-                          color: Colors.grey,
-                          size: 40,
-                        ),
-                      ),
                     ),
                   );
                 },
               ),
             ),
-
-          const SizedBox(height: 12),
-
-          // 💬 Comment Input (NOW inside card, BELOW the picture)
-          InkWell(
-            onTap: onTapComment,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xfff0f0f0),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Text(
-                "What's on your mind?",
-                style: TextStyle(
-                  fontFamily: 'Montserrat',
-                  fontSize: 13,
-                  color: Colors.black54,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            ),
-          ),
         ],
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final favoritePosts = posts
+        .where((post) => post["isLiked"] == true)
+        .toList();
+
+    return Scaffold(
+      backgroundColor: const Color(0xff213448),
+      appBar: AppBar(
+        title: const Text("Favorites ❤️"),
+        backgroundColor: const Color(0xff213448),
+      ),
+      body: favoritePosts.isEmpty
+          ? const Center(
+              child: Text(
+                "No favorites yet",
+                style: TextStyle(color: Colors.white70, fontSize: 16),
+              ),
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: favoritePosts
+                    .map((post) => trendingCard(post))
+                    .toList(),
+              ),
+            ),
     );
   }
 }
