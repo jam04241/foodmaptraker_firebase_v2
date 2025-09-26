@@ -28,7 +28,7 @@ class LoginDesign extends StatelessWidget {
                 Column(
                   children: [
                     const Text(
-                      "Map My Meal",
+                      "Hinahanap Kita",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 40,
