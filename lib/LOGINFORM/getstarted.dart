@@ -34,7 +34,7 @@ class _HomepageState extends State<Homepage> {
                 Column(
                   children: [
                     const Text(
-                      "Welcome to FoodTracker",
+                      "Hinahanap Kita",
                       style: TextStyle(
                         fontFamily: 'Montserrat',
                         fontWeight: FontWeight.bold,
