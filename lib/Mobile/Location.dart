@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+// import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:foodtracker_firebase/Properties/locationAssets/foodLocation.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -11,8 +12,14 @@ class NavLocationPage extends StatefulWidget {
 }
 
 class _NavLocationPageState extends State<NavLocationPage> {
-  final MapController _mapController = MapController();
+  late final MapController _mapController;
   final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _mapController = MapController();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +42,10 @@ class _NavLocationPageState extends State<NavLocationPage> {
               ),
 
               // 🔹 Call Markerlayer here
-              foodLocationMarker(context),
+              foodLocationMarker(context, _mapController),
+
+              //Current location marker
+              // CurrentLocationLayer(),
             ],
           ),
 

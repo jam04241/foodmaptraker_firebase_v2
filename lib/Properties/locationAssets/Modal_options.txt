@@ -1,0 +1,125 @@
+//NO BARRIER COLOR showModalBottomSheet
+
+void _showMarkerInfo(BuildContext context, String title, String description) {
+  showModalBottomSheet(
+    context: context,
+    barrierColor: Colors.transparent,
+    backgroundColor: const Color(0xff2f4a5d),
+    isScrollControlled: true, // allow full height if needed
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (context) {
+      return DraggableScrollableSheet(
+        initialChildSize: 0.3, // start at 30% of screen height
+        minChildSize: 0.2, // can collapse to 20%
+        maxChildSize: 0.8, // can expand to 80%
+        expand: false, // so it won’t take full height automatically
+        builder: (_, controller) => Container(
+          padding: const EdgeInsets.all(16),
+          child: ListView(
+            controller: controller, // make it scroll with sheet
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(description, style: const TextStyle(color: Colors.white)),
+              const SizedBox(height: 20),
+
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.directions, size: 20),
+                    SizedBox(width: 8),
+                    Text("Directions"),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+
+
+
+
+
+
+
+
+//NO BARRIER COLOR showBottomSheet(CURRENTLY USE)
+void _showMarkerInfo(BuildContext context, String title, String description) {
+  showBottomSheet(
+    context: context,
+    backgroundColor: const Color(0xff2f4a5d),
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
+    builder: (context) => Container(
+      padding: const EdgeInsets.all(16),
+      height: 200,
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          //First Column for details
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xffffffff),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                description,
+                style: const TextStyle(color: Color(0xffffffff)),
+              ),
+              const SizedBox(height: 20),
+
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min, // keep button compact
+                  children: [
+                    Icon(Icons.directions, size: 20), // leading icon
+                    SizedBox(width: 8), // spacing
+                    Text("Directions"),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+}
