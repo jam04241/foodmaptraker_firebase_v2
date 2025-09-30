@@ -49,6 +49,14 @@ class LoginDesign extends StatelessWidget {
                 Column(
                   children: [
                     Container(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [Color(0xff141e30), Color(0xff243b55)],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
                       margin: const EdgeInsets.only(bottom: 20),
                       child: OutlinedButton(
                         style: OutlinedButton.styleFrom(

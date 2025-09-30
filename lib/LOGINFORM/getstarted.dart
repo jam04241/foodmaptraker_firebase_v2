@@ -19,7 +19,7 @@ class _HomepageState extends State<Homepage> {
         height: MediaQuery.of(context).size.height,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xff213448), Color(0xff1a2c3a)],
+            colors: [Color(0xff213448), Color(0xff213448)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),

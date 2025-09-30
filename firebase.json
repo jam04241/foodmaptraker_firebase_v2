@@ -1,1 +1,33 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"foodtracker-4e173","appId":"1:210523581762:android:70baceecbb2b81e6146cdb","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"foodtracker-4e173","configurations":{"android":"1:210523581762:android:70baceecbb2b81e6146cdb","ios":"1:210523581762:ios:1a060d871cfda632146cdb","macos":"1:210523581762:ios:1a060d871cfda632146cdb","web":"1:210523581762:web:ccad93f0edd49a77146cdb","windows":"1:210523581762:web:0110dfaf3bb1bcbe146cdb"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "foodtracker-4e173",
+          "appId": "1:210523581762:android:70baceecbb2b81e6146cdb",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "foodtracker-4e173",
+          "configurations": {
+            "android": "1:210523581762:android:70baceecbb2b81e6146cdb",
+            "ios": "1:210523581762:ios:1a060d871cfda632146cdb",
+            "macos": "1:210523581762:ios:1a060d871cfda632146cdb",
+            "web": "1:210523581762:web:ccad93f0edd49a77146cdb",
+            "windows": "1:210523581762:web:0110dfaf3bb1bcbe146cdb"
+          }
+        }
+      }
+    }
+  },
+  "emulators": {
+    "dataconnect": {
+      "dataDir": "dataconnect/.dataconnect/pgliteData"
+    }
+  },
+  "dataconnect": {
+    "source": "dataconnect"
+  }
+}

@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'foodtracker-4e173.firebasestorage.app',
     measurementId: 'G-0H8EC0L383',
   );
+
 }

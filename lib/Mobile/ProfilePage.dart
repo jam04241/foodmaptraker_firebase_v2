@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:foodtracker_firebase/Loginform/log_register.dart';
 
 class NavProfilePage extends StatefulWidget {
   const NavProfilePage({super.key});
@@ -362,8 +364,17 @@ class _NavProfilePageState extends State<NavProfilePage> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                onTap: () {
-                  // Handle Logout
+                onTap: () async {
+                  // Perform Firebase logout
+                  await FirebaseAuth.instance.signOut();
+
+                  // Navigate to Login screen after logout
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const LoginDesign(),
+                    ),
+                  );
                 },
               ),
             ),
