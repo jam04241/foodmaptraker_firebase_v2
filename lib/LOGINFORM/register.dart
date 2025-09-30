@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:foodtracker_firebase/Loginform/login.dart';
+import 'package:foodtracker_firebase/Loginform/log_register.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -18,7 +18,6 @@ class _RegisterState extends State<Register> {
 
   String errorMessage = "";
   bool isError = false;
-
   @override
   void dispose() {
     usernameController.dispose();
@@ -46,7 +45,7 @@ class _RegisterState extends State<Register> {
       // Success → go to Login
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Login()),
+        MaterialPageRoute(builder: (context) => const LoginDesign()),
       );
     } on FirebaseAuthException catch (e) {
       setState(() {
@@ -75,114 +74,126 @@ class _RegisterState extends State<Register> {
           ),
         ),
         child: SafeArea(
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  children: [
-                    Stack(
-                      children: [
-                        const Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            "Register",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 40,
-                              fontFamily: 'Montserrat',
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.arrow_back,
-                              color: Colors.white,
-                            ),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 30),
-                    const CircleAvatar(
-                      radius: 100,
-                      backgroundImage: AssetImage('images/foodtracker.jpg'),
-                      backgroundColor: Colors.white,
-                    ),
-                    const SizedBox(height: 50),
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
 
-                    // Username
-                    _buildTextField(
-                      usernameController,
-                      Icons.account_circle,
-                      "Create your Username",
-                    ),
-                    const SizedBox(height: 20),
+                const SizedBox(height: 40),
 
-                    // Email
-                    _buildTextField(
-                      emailController,
-                      Icons.email,
-                      "Email Address",
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Password
-                    _buildTextField(
-                      passwordController,
-                      Icons.lock,
-                      "Enter your Password",
-                      obscureText: true,
-                    ),
-                    const SizedBox(height: 20),
-
-                    // Confirm Password
-                    _buildTextField(
-                      confirmPasswordController,
-                      Icons.lock_outline,
-                      "Confirm Password",
-                      obscureText: true,
-                    ),
-                    const SizedBox(height: 30),
-
-                    // Error message
-                    if (isError)
-                      Text(
-                        errorMessage,
-                        style: const TextStyle(color: Colors.red, fontSize: 16),
+                Center(
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.fastfood_outlined,
+                        size: 80,
+                        color: Colors.white,
                       ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        "Register",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 32,
+                          fontFamily: 'Montserrat',
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      if (isError) const SizedBox(height: 20),
+                      if (isError)
+                        Text(
+                          errorMessage,
+                          style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 14,
+                          ),
+                        ),
+                      const SizedBox(height: 20),
+                      // Username
+                      _buildTextField(
+                        usernameController,
+                        Icons.account_circle,
+                        "Create your Username",
+                      ),
+                      const SizedBox(height: 20),
 
-                    const SizedBox(height: 20),
+                      // Email
+                      _buildTextField(
+                        emailController,
+                        Icons.email,
+                        "Email Address",
+                      ),
+                      const SizedBox(height: 20),
 
-                    // Register Button
-                    SizedBox(
-                      width: 500,
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: Colors.white, width: 2),
-                          minimumSize: const Size(500, 60),
-                          shape: RoundedRectangleBorder(
+                      // Password
+                      _buildTextField(
+                        passwordController,
+                        Icons.lock,
+                        "Enter your Password",
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Confirm Password
+                      _buildTextField(
+                        confirmPasswordController,
+                        Icons.lock_outline,
+                        "Confirm Password",
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Error message
+
+                      // Register Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xff141e30), Color(0xff243b55)],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
                             borderRadius: BorderRadius.circular(50),
                           ),
-                        ),
-                        onPressed: register,
-                        child: const Text(
-                          "Register",
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 20,
-                            fontFamily: 'Montserrat',
-                            color: Colors.white,
+                          child: ElevatedButton(
+                            onPressed: register, // <-- your register function
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              minimumSize: const Size(400, 60),
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(50),
+                                side: const BorderSide(
+                                  // White border
+                                  color: Colors.white,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            child: const Text(
+                              "Register",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Montserrat',
+                                color: Colors
+                                    .white, // white text fits gradient better
+                              ),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),

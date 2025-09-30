@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:foodtracker_firebase/Properties/trendingAssets/post_modal.dart';
 import 'package:foodtracker_firebase/Properties/trendingAssets/review_modal.dart';
+import 'package:foodtracker_firebase/model/Users.dart';
 
 class NavTrendingPage extends StatefulWidget {
   const NavTrendingPage({super.key});
@@ -12,103 +14,7 @@ class NavTrendingPage extends StatefulWidget {
 
 class _TrendingsState extends State<NavTrendingPage> {
   final TextEditingController postController = TextEditingController();
-
-  List<Map<String, dynamic>> posts = [
-    {
-      "username": "Alice",
-      "location": "Manila, Philippines",
-      "profileImage": "https://randomuser.me/api/portraits/women/44.jpg",
-      "restaurant": "Ichiran Ramen",
-      "restaurantImages": [
-        "https://images.pexels.com/photos/1199957/pexels-photo-1199957.jpeg",
-        "https://images.pexels.com/photos/941861/pexels-photo-941861.jpeg",
-      ],
-      "caption": "Best ramen I’ve had 🍜🔥",
-      "rating": 4.7,
-      "hearts": 123,
-      "isLiked": false,
-      "comment": "",
-      "timeAgo": "2h ago",
-    },
-    {
-      "username": "Bob",
-      "location": "Cebu City",
-      "profileImage": "https://randomuser.me/api/portraits/men/36.jpg",
-      "restaurant": "Lantaw Native Restaurant",
-      "restaurantImages": [
-        "https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg",
-        "https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg",
-      ],
-      "caption": "Chill vibes, good food 😋",
-      "rating": 4.3,
-      "hearts": 98,
-      "isLiked": false,
-      "comment": "",
-      "timeAgo": "5h ago",
-    },
-    {
-      "username": "Carla",
-      "location": "Davao City",
-      "profileImage": "https://randomuser.me/api/portraits/women/65.jpg",
-      "restaurant": "Yellow Fin Seafood",
-      "restaurantImages": [
-        "https://images.pexels.com/photos/4210859/pexels-photo-4210859.jpeg",
-        "https://images.pexels.com/photos/3296273/pexels-photo-3296273.jpeg",
-      ],
-      "caption": "Fresh seafood, highly recommended 🐟🦐",
-      "rating": 4.8,
-      "hearts": 210,
-      "isLiked": false,
-      "comment": "",
-      "timeAgo": "1d ago",
-    },
-    {
-      "username": "Daniel",
-      "location": "Quezon City",
-      "profileImage": "https://randomuser.me/api/portraits/men/22.jpg",
-      "restaurant": "Burger Shack",
-      "restaurantImages": [
-        "https://images.pexels.com/photos/1639567/pexels-photo-1639567.jpeg",
-      ],
-      "caption": "Burgers were okay, but kinda dry 🍔",
-      "rating": 3.5,
-      "hearts": 54,
-      "isLiked": false,
-      "comment": "",
-      "timeAgo": "3d ago",
-    },
-    {
-      "username": "Ella",
-      "location": "Taguig",
-      "profileImage": "https://randomuser.me/api/portraits/women/12.jpg",
-      "restaurant": "Sushi Express",
-      "restaurantImages": [
-        "https://images.pexels.com/photos/357756/pexels-photo-357756.jpeg",
-        "https://images.pexels.com/photos/2098085/pexels-photo-2098085.jpeg",
-      ],
-      "caption": "Too much rice, less fish 🍣😕",
-      "rating": 2.8,
-      "hearts": 37,
-      "isLiked": false,
-      "comment": "",
-      "timeAgo": "5d ago",
-    },
-    {
-      "username": "Frank",
-      "location": "Makati",
-      "profileImage": "https://randomuser.me/api/portraits/men/77.jpg",
-      "restaurant": "Pizza Town",
-      "restaurantImages": [
-        "https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg",
-      ],
-      "caption": "Pizza was cold when served 🍕❄️",
-      "rating": 3.2,
-      "hearts": 80,
-      "isLiked": false,
-      "comment": "",
-      "timeAgo": "1w ago",
-    },
-  ];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   String sortOrder = "Highest First";
 
@@ -118,17 +24,6 @@ class _TrendingsState extends State<NavTrendingPage> {
     super.dispose();
   }
 
-  // Sort posts based on rating
-  void sortPosts() {
-    setState(() {
-      if (sortOrder == "Highest First") {
-        posts.sort((a, b) => (b["rating"] as double).compareTo(a["rating"]));
-      } else {
-        posts.sort((a, b) => (a["rating"] as double).compareTo(b["rating"]));
-      }
-    });
-  }
-
   // Open Post Modal
   void openPostModal(BuildContext context) {
     showModalBottomSheet(
@@ -136,24 +31,19 @@ class _TrendingsState extends State<NavTrendingPage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => PostModal(postController: postController),
-    );
+    ).then((_) {
+      // Refresh posts when modal closes
+      setState(() {});
+    });
   }
 
   // Open Review Modal
-  void openCommentModal(BuildContext context, int index) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => ReviewModal(
-        restaurantName: posts[index]["restaurant"],
-        onSubmit: (rating, comment) {
-          setState(() {
-            posts[index]["rating"] = rating;
-            posts[index]["comment"] = comment;
-            posts[index]["hearts"] = (posts[index]["hearts"] as int) + 1;
-          });
-
+  void openCommentModal(BuildContext context, PostUser post) {
+    Widget buildReviewModal(BuildContext context) {
+      return ReviewModal(
+        postId: post.id,
+        restaurantName: "Restaurant",
+        onSubmit: (double rating, String comment) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text("✅ Review submitted successfully!"),
@@ -161,13 +51,68 @@ class _TrendingsState extends State<NavTrendingPage> {
             ),
           );
         },
-      ),
-    );
+      );
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: buildReviewModal, // Use the separate builder function
+    ).then((value) {
+      setState(() {});
+    });
+  }
+
+  // Toggle like status
+  Future<void> toggleLike(PostUser post) async {
+    try {
+      await _firestore.collection('posts').doc(post.id).update({
+        'isLiked': !(post.isLiked ?? false),
+        'hearts': (post.hearts ?? 0) + ((post.isLiked ?? false) ? -1 : 1),
+      });
+    } catch (e) {
+      print('Error toggling like: $e');
+    }
+  }
+
+  // Get time ago from timestamp
+  String getTimeAgo(dynamic timestamp) {
+    if (timestamp == null) return "Recently";
+
+    DateTime postTime;
+
+    // Handle both Timestamp and DateTime
+    if (timestamp is Timestamp) {
+      postTime = timestamp.toDate();
+    } else if (timestamp is DateTime) {
+      postTime = timestamp;
+    } else {
+      return "Recently";
+    }
+
+    final now = DateTime.now();
+    final difference = now.difference(postTime);
+
+    if (difference.inDays > 0) {
+      return "${difference.inDays}d ago";
+    } else if (difference.inHours > 0) {
+      return "${difference.inHours}h ago";
+    } else if (difference.inMinutes > 0) {
+      return "${difference.inMinutes}m ago";
+    } else {
+      return "Just now";
+    }
   }
 
   // Post Card
-  Widget trendingCard(int index) {
-    final post = posts[index];
+  Widget trendingCard(PostUser post) {
+    // Convert rates string to double for rating
+    double rating = double.tryParse(post.rates) ?? 0.0;
+
+    // Parse images - assuming it's a single URL string, convert to list
+    List<String> restaurantImages = post.images.isNotEmpty ? [post.images] : [];
+
     return Container(
       margin: const EdgeInsets.only(top: 16),
       padding: const EdgeInsets.all(16),
@@ -181,30 +126,30 @@ class _TrendingsState extends State<NavTrendingPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // User Info + Heart
           Row(
             children: [
               CircleAvatar(
                 radius: 24,
-                backgroundImage: NetworkImage(post["profileImage"]),
+                backgroundColor: Colors.grey[300],
+                child: const Icon(Icons.person, color: Colors.grey),
               ),
               const SizedBox(width: 12),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    post["username"],
+                    "User",
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
                   ),
                   Text(
-                    post["location"],
+                    post.location,
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   Text(
-                    post["restaurant"],
+                    "Restaurant",
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -212,34 +157,26 @@ class _TrendingsState extends State<NavTrendingPage> {
                     ),
                   ),
                   Text(
-                    post["timeAgo"], // timeline
+                    getTimeAgo(post.timestamp),
                     style: const TextStyle(fontSize: 11, color: Colors.grey),
                   ),
                 ],
               ),
               const Spacer(),
               InkWell(
-                onTap: () {
-                  setState(() {
-                    if (post["isLiked"] == true) {
-                      post["isLiked"] = false;
-                      post["hearts"] = (post["hearts"] as int) - 1;
-                    } else {
-                      post["isLiked"] = true;
-                      post["hearts"] = (post["hearts"] as int) + 1;
-                    }
-                  });
-                },
+                onTap: () => toggleLike(post),
                 child: Row(
                   children: [
                     Icon(
-                      post["isLiked"] ? Icons.favorite : Icons.favorite_border,
+                      (post.isLiked ?? false)
+                          ? Icons.favorite
+                          : Icons.favorite_border,
                       size: 20,
-                      color: post["isLiked"] ? Colors.red : Colors.grey,
+                      color: (post.isLiked ?? false) ? Colors.red : Colors.grey,
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      "${post["hearts"]}",
+                      "${post.hearts ?? 0}",
                       style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
@@ -254,7 +191,7 @@ class _TrendingsState extends State<NavTrendingPage> {
           Row(
             children: [
               RatingBarIndicator(
-                rating: post["rating"],
+                rating: rating,
                 itemBuilder: (context, index) =>
                     const Icon(Icons.star, color: Colors.amber),
                 itemCount: 5,
@@ -263,7 +200,7 @@ class _TrendingsState extends State<NavTrendingPage> {
               ),
               const SizedBox(width: 8),
               Text(
-                post["rating"].toStringAsFixed(1),
+                rating.toStringAsFixed(1),
                 style: const TextStyle(
                   fontSize: 13,
                   color: Colors.black87,
@@ -277,7 +214,7 @@ class _TrendingsState extends State<NavTrendingPage> {
 
           // Caption
           Text(
-            post["caption"],
+            post.description,
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
@@ -288,21 +225,32 @@ class _TrendingsState extends State<NavTrendingPage> {
           const SizedBox(height: 12),
 
           // Restaurant Pictures
-          if (post["restaurantImages"].isNotEmpty)
+          if (restaurantImages.isNotEmpty)
             SizedBox(
               height: 160,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                itemCount: post["restaurantImages"].length,
+                itemCount: restaurantImages.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 10),
                 itemBuilder: (context, imgIndex) {
                   return ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Image.network(
-                      post["restaurantImages"][imgIndex],
+                      restaurantImages[imgIndex],
                       width: 220,
                       height: 160,
                       fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: 220,
+                          height: 160,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.image, color: Colors.grey),
+                        );
+                      },
                     ),
                   );
                 },
@@ -313,7 +261,7 @@ class _TrendingsState extends State<NavTrendingPage> {
 
           // Comment input below the pictures
           InkWell(
-            onTap: () => openCommentModal(context, index),
+            onTap: () => openCommentModal(context, post),
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(12),
@@ -338,8 +286,6 @@ class _TrendingsState extends State<NavTrendingPage> {
 
   @override
   Widget build(BuildContext context) {
-    sortPosts();
-
     return Scaffold(
       backgroundColor: const Color(0xff213448),
       appBar: AppBar(
@@ -362,7 +308,6 @@ class _TrendingsState extends State<NavTrendingPage> {
               onSelected: (String newValue) {
                 setState(() {
                   sortOrder = newValue;
-                  sortPosts();
                 });
               },
               color: Colors.white,
@@ -439,12 +384,7 @@ class _TrendingsState extends State<NavTrendingPage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CircleAvatar(
-                    radius: 24,
-                    backgroundImage: NetworkImage(
-                      "https://randomuser.me/api/portraits/men/12.jpg",
-                    ),
-                  ),
+                  const CircleAvatar(radius: 24),
                   const SizedBox(width: 12),
                   Expanded(
                     child: SizedBox(
@@ -475,8 +415,77 @@ class _TrendingsState extends State<NavTrendingPage> {
               ),
             ),
 
-            // Posts
-            for (int i = 0; i < posts.length; i++) trendingCard(i),
+            const SizedBox(height: 16),
+
+            // Posts from Firebase
+            StreamBuilder<QuerySnapshot>(
+              stream: _firestore
+                  .collection('posts')
+                  .orderBy('timestamp', descending: true)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Container(
+                    margin: const EdgeInsets.only(top: 20),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Column(
+                      children: [
+                        Icon(Icons.post_add, size: 50, color: Colors.grey),
+                        SizedBox(height: 10),
+                        Text(
+                          'No posts yet',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                        SizedBox(height: 5),
+                        Text(
+                          'Be the first to share your food experience!',
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                // Convert documents to PostUser objects
+                List<PostUser> posts = snapshot.data!.docs.map((doc) {
+                  Map<String, dynamic> data =
+                      doc.data() as Map<String, dynamic>;
+                  return PostUser.fromJson(data);
+                }).toList();
+
+                // Sort posts based on selection
+                if (sortOrder == "Highest First") {
+                  posts.sort((a, b) {
+                    double ratingA = double.tryParse(a.rates) ?? 0.0;
+                    double ratingB = double.tryParse(b.rates) ?? 0.0;
+                    return ratingB.compareTo(ratingA);
+                  });
+                } else {
+                  posts.sort((a, b) {
+                    double ratingA = double.tryParse(a.rates) ?? 0.0;
+                    double ratingB = double.tryParse(b.rates) ?? 0.0;
+                    return ratingA.compareTo(ratingB);
+                  });
+                }
+
+                return Column(
+                  children: posts.map((post) => trendingCard(post)).toList(),
+                );
+              },
+            ),
           ],
         ),
       ),

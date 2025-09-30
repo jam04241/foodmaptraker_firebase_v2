@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:foodtracker_firebase/Widget/bottomNav.dart';
-
 import 'package:foodtracker_firebase/Mobile/Dashboard.dart';
 import 'package:foodtracker_firebase/Mobile/Trending.dart';
 import 'package:foodtracker_firebase/Mobile/Location.dart';

@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:foodtracker_firebase/Mobile/Mainframe.dart';
@@ -12,15 +11,25 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   bool _obscurePassword = true;
+
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
-  String errorMessage = "";
-  bool isError = false;
+  late String errorMessage = "";
+  late bool isError = false;
 
   @override
   void initState() {
+    errorMessage = "";
+    isError = false;
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
     _navigateUser();
   }
 
@@ -36,39 +45,33 @@ class _LoginState extends State<Login> {
     }
   }
 
-  Future<void> checkLogin(String email, String password) async {
+  Future checkLogin(email, password) async {
     showDialog(
       context: context,
+      useRootNavigator: false,
       barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+      builder: (context) => const Center(child: CircularProgressIndicator()),
     );
 
     try {
-      UserCredential credential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: email, password: password);
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
-      // Save user data in Firestore if not exists
-      User user = credential.user!;
-      await FirebaseFirestore.instance.collection("users").doc(user.uid).set({
-        "email": user.email,
-        "uid": user.uid,
-        "lastLogin": DateTime.now(),
-      }, SetOptions(merge: true));
-
-      if (mounted) Navigator.pop(context); // close dialog
+      Navigator.pop(context);
       setState(() {
         errorMessage = "";
         isError = false;
       });
-
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const Mainframe()),
       );
     } on FirebaseAuthException catch (e) {
-      if (mounted) Navigator.pop(context);
+      Navigator.pop(context);
       setState(() {
-        errorMessage = e.message ?? "Login failed";
+        errorMessage = e.message.toString();
         isError = true;
       });
     }
@@ -87,86 +90,160 @@ class _LoginState extends State<Login> {
           ),
         ),
         child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(30),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "Login",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 36,
-                    color: Colors.white,
-                  ),
+          child: Stack(
+            children: [
+              // 🔹 Back Button at the top-left
+              Positioned(
+                top: 30,
+                left: 30,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
                 ),
-                const SizedBox(height: 20),
-                if (isError)
-                  Text(errorMessage, style: const TextStyle(color: Colors.red)),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: emailController,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.person),
-                    hintText: "Enter your Email",
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
+              ),
+
+              // 🔹 Centered Login Form
+              Padding(
+                padding: const EdgeInsets.all(30),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.fastfood_outlined,
+                      size: 80,
+                      color: Colors.white,
                     ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  controller: passwordController,
-                  obscureText: _obscurePassword,
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.lock),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                    hintText: "Enter your Password",
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 40),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await checkLogin(
-                        emailController.text.trim(),
-                        passwordController.text.trim(),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                    const SizedBox(height: 20),
+
+                    const Text(
+                      "Login",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 32,
+                        color: Colors.white,
                       ),
                     ),
-                    child: const Text("Login"),
-                  ),
+                    const SizedBox(height: 30),
+
+                    if (isError)
+                      Text(
+                        errorMessage,
+                        style: const TextStyle(
+                          color: Colors.redAccent,
+                          fontSize: 14,
+                        ),
+                      ),
+                    if (isError) const SizedBox(height: 20),
+
+                    TextField(
+                      controller: emailController,
+                      style: const TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(
+                          Icons.email,
+                          color: Colors.black54,
+                        ),
+                        hintText: "Email",
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 18,
+                          horizontal: 20,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    TextField(
+                      controller: passwordController,
+                      obscureText: _obscurePassword,
+                      style: const TextStyle(color: Colors.black),
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(
+                          Icons.lock,
+                          color: Colors.black54,
+                        ),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: Colors.black54,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                        hintText: "Password",
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 18,
+                          horizontal: 20,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xff141e30), Color(0xff243b55)],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                          borderRadius: BorderRadius.circular(50),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await checkLogin(
+                              emailController.text.trim(),
+                              passwordController.text.trim(),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            minimumSize: const Size(400, 60),
+                            side: const BorderSide(
+                              color: Colors.white,
+                              width: 2,
+                            ),
+                            backgroundColor:
+                                Colors.transparent, // Transparent button
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                          ),
+                          child: const Text(
+                            "Login",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 20,
+                              fontFamily: 'Montserrat',
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
