@@ -1,3 +1,4 @@
+// Location.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 // import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
@@ -27,10 +28,14 @@ class _NavLocationPageState extends State<NavLocationPage> {
       body: Stack(
         children: [
           /// MAP BEHIND
+          /// Map for Open Street Map
           FlutterMap(
             mapController: _mapController,
             options: const MapOptions(
-              initialCenter: LatLng(7.082414628289476, 125.61406854129964),
+              initialCenter: LatLng(
+                7.082414628289476,
+                125.61406854129964,
+              ), // For zomm in
               initialZoom: 16,
               minZoom: 2,
               maxZoom: 19,
@@ -41,8 +46,8 @@ class _NavLocationPageState extends State<NavLocationPage> {
                 userAgentPackageName: 'com.example.app',
               ),
 
-              // 🔹 Call Markerlayer here
-              foodLocationMarker(context, _mapController),
+              // ✅ WITH THIS:
+              buildFoodLocationMarkers(context, _mapController),
 
               //Current location marker
               // CurrentLocationLayer(),
