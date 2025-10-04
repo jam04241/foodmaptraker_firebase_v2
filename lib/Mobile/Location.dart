@@ -167,7 +167,7 @@ class _NavLocationPageState extends State<NavLocationPage> {
             mapController: _mapController,
             options: MapOptions(
               initialCenter: _currentLocation,
-              initialZoom: 16,
+              initialZoom: 14,
               minZoom: 2,
               maxZoom: 19,
             ),
