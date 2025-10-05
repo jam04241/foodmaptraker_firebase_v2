@@ -2,14 +2,19 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:foodtracker_firebase/Loginform/getstarted.dart';
 import 'package:foodtracker_firebase/firebase_options.dart';
-<<<<<<< HEAD
-// import 'package:foodtracker_firebase/Mobile/Mainframe.dart';
-=======
->>>>>>> origin/master
+import 'package:foodtracker_firebase/model/LocationDataScript.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  //Script for marker if they will upload to firebase
+  try {
+    await FirebaseUploader.uploadLocationsToFirebase();
+  } catch (e) {
+    print('❌ Error uploading locations: $e');
+  }
+
   runApp(const MyApp());
 }
 

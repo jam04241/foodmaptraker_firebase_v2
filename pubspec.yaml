@@ -52,6 +52,7 @@ dependencies:
   cloud_firestore: ^6.0.2
   file_picker: ^10.3.3
   firebase_storage: ^13.0.2
+  auto_size_text: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -79,7 +80,6 @@ flutter:
   assets:
     - images/
     - images/foodtracker_dark.png
-    
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
