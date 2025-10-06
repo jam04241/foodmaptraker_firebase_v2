@@ -92,7 +92,7 @@ class FirebaseCollectionInitializer {
         'id': 'post_001',
         'description':
             'Amazing barbecue experience at Lala\'s! The meat was perfectly cooked and the service was exceptional. Definitely coming back! 🍖',
-        'location': 'Lala\'s Barbecue',
+        'location': 'Obrero, Davao City',
         'rates': '4.5',
         'images': 'images/food2.jpg',
         'userName': 'John Doe', // Denormalized for easy access
@@ -107,7 +107,7 @@ class FirebaseCollectionInitializer {
         'id': 'post_002',
         'description':
             'Cozy coffee shop with the best latte art I\'ve ever seen! Perfect place to work or relax. ☕',
-        'location': 'Slate Coffee + Deli',
+        'location': 'Obrero, Davao City',
         'rates': '4.2',
         'images': 'images/food3.jpg',
         'userName': 'Jane Smith', // Denormalized for easy access
@@ -122,7 +122,7 @@ class FirebaseCollectionInitializer {
         'id': 'post_003',
         'description':
             'Authentic Japanese cuisine that transports you to Tokyo! The sushi was fresh and the ramen was incredible. 🍣',
-        'location': 'Nonki Japanese Restaurant',
+        'location': 'Obrero, Davao City',
         'rates': '4.8',
         'images': 'images/food4.jpg',
         'userId': 'user_003', // Links to Mike Johnson

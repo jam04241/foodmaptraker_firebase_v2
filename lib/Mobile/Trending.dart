@@ -20,7 +20,7 @@ class _TrendingsState extends State<NavTrendingPage> {
 
   String? currentUserId;
   String? currentUserName;
-  String sortOrder = "Highest First";
+  String sortOrder = "Newest Post"; // ✅ CHANGED DEFAULT TO NEWEST POST
 
   @override
   void initState() {
@@ -169,7 +169,7 @@ class _TrendingsState extends State<NavTrendingPage> {
       margin: const EdgeInsets.only(top: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xff2f4a5d), // ✅ BACKGROUND COLOR CHANGED
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
@@ -178,7 +178,7 @@ class _TrendingsState extends State<NavTrendingPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // In trendingCard widget, replace the user section:
+          // User section
           Row(
             children: [
               CircleAvatar(
@@ -191,27 +191,28 @@ class _TrendingsState extends State<NavTrendingPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    post.userName, // Use actual username from post
+                    post.userName,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
+                      color: Colors.white, // ✅ Text color for better contrast
                     ),
                   ),
                   Text(
                     post.location,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    style: const TextStyle(fontSize: 12, color: Colors.white70),
                   ),
                   Text(
-                    post.restaurantName, // Use actual restaurant name
+                    post.restaurantName,
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: Colors.white, // ✅ Text color for better contrast
                     ),
                   ),
                   Text(
                     getTimeAgo(post.timestamp),
-                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                    style: const TextStyle(fontSize: 11, color: Colors.white70),
                   ),
                 ],
               ),
@@ -225,12 +226,17 @@ class _TrendingsState extends State<NavTrendingPage> {
                           ? Icons.favorite
                           : Icons.favorite_border,
                       size: 20,
-                      color: (post.isLiked ?? false) ? Colors.red : Colors.grey,
+                      color: (post.isLiked ?? false)
+                          ? Colors.red
+                          : Colors.white70,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       "${post.hearts ?? 0}",
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.white70,
+                      ),
                     ),
                   ],
                 ),
@@ -256,7 +262,7 @@ class _TrendingsState extends State<NavTrendingPage> {
                 rating.toStringAsFixed(1),
                 style: const TextStyle(
                   fontSize: 13,
-                  color: Colors.black87,
+                  color: Colors.white, // ✅ Text color for better contrast
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -271,7 +277,7 @@ class _TrendingsState extends State<NavTrendingPage> {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Colors.black87,
+              color: Colors.white, // ✅ Text color for better contrast
             ),
           ),
 
@@ -319,14 +325,14 @@ class _TrendingsState extends State<NavTrendingPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xfff0f0f0),
+                color: const Color(0xff3a556e), // ✅ Slightly lighter background
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Text(
                 "What's on your mind?",
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.black54,
+                  color: Colors.white70, // ✅ Lighter text color
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -369,23 +375,25 @@ class _TrendingsState extends State<NavTrendingPage> {
                 borderRadius: BorderRadius.circular(12),
               ),
               itemBuilder: (BuildContext context) => [
+                // ✅ CHANGED TO NEWEST POST
                 PopupMenuItem(
-                  value: "Highest First",
+                  value: "Newest Post",
                   child: Row(
                     children: const [
                       Icon(Icons.arrow_downward, color: Colors.black54),
                       SizedBox(width: 8),
-                      Text("Highest First"),
+                      Text("Newest Post"),
                     ],
                   ),
                 ),
+                // ✅ CHANGED TO OLDEST POST
                 PopupMenuItem(
-                  value: "Lowest First",
+                  value: "Oldest Post",
                   child: Row(
                     children: const [
                       Icon(Icons.arrow_upward, color: Colors.black54),
                       SizedBox(width: 8),
-                      Text("Lowest First"),
+                      Text("Oldest Post"),
                     ],
                   ),
                 ),
@@ -418,13 +426,14 @@ class _TrendingsState extends State<NavTrendingPage> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
+
         child: Column(
           children: [
             // Create Post Button
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Color(0xff2f4a5d),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: const [
                   BoxShadow(
@@ -444,7 +453,7 @@ class _TrendingsState extends State<NavTrendingPage> {
                       height: 50,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xfff0f0f0),
+                          backgroundColor: const Color(0xff3a556e),
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -457,7 +466,7 @@ class _TrendingsState extends State<NavTrendingPage> {
                             "What's on your mind?",
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.black54,
+                              color: Colors.white70,
                             ),
                           ),
                         ),
@@ -474,7 +483,10 @@ class _TrendingsState extends State<NavTrendingPage> {
             StreamBuilder<QuerySnapshot>(
               stream: _firestore
                   .collection('posts')
-                  .orderBy('timestamp', descending: true)
+                  .orderBy(
+                    'timestamp',
+                    descending: true,
+                  ) // Default: newest first
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
@@ -519,19 +531,13 @@ class _TrendingsState extends State<NavTrendingPage> {
                   return PostUser.fromJson(data);
                 }).toList();
 
-                // Sort posts based on selection
-                if (sortOrder == "Highest First") {
-                  posts.sort((a, b) {
-                    double ratingA = double.tryParse(a.rates) ?? 0.0;
-                    double ratingB = double.tryParse(b.rates) ?? 0.0;
-                    return ratingB.compareTo(ratingA);
-                  });
-                } else {
-                  posts.sort((a, b) {
-                    double ratingA = double.tryParse(a.rates) ?? 0.0;
-                    double ratingB = double.tryParse(b.rates) ?? 0.0;
-                    return ratingA.compareTo(ratingB);
-                  });
+                // ✅ UPDATED SORTING LOGIC FOR TIMESTAMP
+                if (sortOrder == "Newest Post") {
+                  // Already sorted by newest first from Firestore, no need to re-sort
+                  // Or reverse if needed
+                  posts.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+                } else if (sortOrder == "Oldest Post") {
+                  posts.sort((a, b) => a.timestamp.compareTo(b.timestamp));
                 }
 
                 return Column(
