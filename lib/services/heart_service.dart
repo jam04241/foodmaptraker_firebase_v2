@@ -29,14 +29,15 @@ class _HeartReactionState extends State<HeartReaction>
     super.initState();
 
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 400),
       vsync: this,
     );
 
-    _scaleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.5), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: 1.5, end: 1.0), weight: 50),
-    ]).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+    // FIXED: Simple tween without sequence to avoid assertion errors
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 1.3,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.elasticOut));
   }
 
   @override
@@ -102,8 +103,9 @@ class _HeartReactionState extends State<HeartReaction>
     });
 
     try {
+      // FIXED: Simple forward and reset without complex sequencing
       await _controller.forward();
-      _controller.reset();
+      await _controller.reverse();
 
       final success = await widget.onLikeToggled(!widget.isLiked);
 

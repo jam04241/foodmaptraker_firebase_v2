@@ -105,6 +105,37 @@ class DatabaseService {
         .snapshots();
   }
 
+  // FIXED: Get posts by user ID - using _firestore instead of firestore
+  Stream<List<PostUser>> getPostsByUserId(String userId) {
+    return _firestore
+        .collection('posts')
+        .where('userId', isEqualTo: userId)
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) => PostUser.fromJson(doc.data() as Map<String, dynamic>),
+              )
+              .toList(),
+        );
+  }
+
+  // FIXED: Get all posts - using _firestore instead of firestore
+  Stream<List<PostUser>> getAllPosts() {
+    return _firestore
+        .collection('posts')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map(
+                (doc) => PostUser.fromJson(doc.data() as Map<String, dynamic>),
+              )
+              .toList(),
+        );
+  }
+
   Future<void> updateComment(
     String commentId,
     String newComment,
