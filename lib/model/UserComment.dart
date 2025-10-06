@@ -4,7 +4,7 @@ class Comment {
   final String id;
   final String postId;
   final String userId;
-  final String userDisplayName;
+  final String userName;
   final String userPhotoURL;
   final String comment;
   final double rating;
@@ -14,7 +14,7 @@ class Comment {
     required this.id,
     required this.postId,
     required this.userId,
-    required this.userDisplayName,
+    required this.userName,
     required this.userPhotoURL,
     required this.comment,
     required this.rating,
@@ -25,7 +25,7 @@ class Comment {
     'id': id,
     'postId': postId,
     'userId': userId,
-    'userDisplayName': userDisplayName,
+    'userName': userName,
     'userPhotoURL': userPhotoURL,
     'comment': comment,
     'rating': rating,
@@ -36,7 +36,7 @@ class Comment {
     id: json['id'] ?? '',
     postId: json['postId'] ?? '',
     userId: json['userId'] ?? '',
-    userDisplayName: json['userDisplayName'] ?? 'Anonymous',
+    userName: json['userName'] ?? 'Anonymous',
     userPhotoURL: json['userPhotoURL'] ?? '',
     comment: json['comment'] ?? '',
     rating: (json['rating'] as num?)?.toDouble() ?? 0.0,

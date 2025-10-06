@@ -4,10 +4,20 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:foodtracker_firebase/model/Users.dart';
+import 'package:foodtracker_firebase/model/postUser.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PostModal extends StatefulWidget {
   final TextEditingController postController;
-  const PostModal({super.key, required this.postController});
+  final String currentUserId; // ✅ DECLARE AS CLASS FIELDS
+  final String currentUserName; // ✅ DECLARE AS CLASS FIELDS
+
+  const PostModal({
+    super.key,
+    required this.postController,
+    required this.currentUserId,
+    required this.currentUserName,
+  });
 
   @override
   State<PostModal> createState() => _PostModalState();
@@ -87,6 +97,7 @@ class _PostModalState extends State<PostModal> {
     }
   }
 
+  // Then in your _savePostToFirestore method, use these parameters:
   Future<void> _savePostToFirestore(String imageUrl) async {
     try {
       _debugLog('Starting Firestore save operation');
@@ -101,8 +112,9 @@ class _PostModalState extends State<PostModal> {
         description: descriptionController.text.trim(),
         location: locationController.text.trim(),
         rates: _rating.toString(),
-        images: imageUrl ?? '',
-        userId: 'current_user_id', // TODO: Replace with actual user ID
+        images: imageUrl,
+        userId: widget.currentUserId, // ✅ USE THE PASSED USER ID
+        userName: widget.currentUserName, // ✅ USE THE PASSED USERNAME
         restaurantName: restaurantController.text.trim().isEmpty
             ? 'Restaurant'
             : restaurantController.text.trim(),
@@ -110,10 +122,10 @@ class _PostModalState extends State<PostModal> {
         isLiked: false,
         hearts: 0,
         likedBy: [],
+        commentCount: 0,
       );
 
       _debugLog('Post data: ${postUser.toJson()}');
-
       await postsCollection.doc(postId).set(postUser.toJson());
       _debugLog('Post successfully saved to Firestore');
     } catch (e) {

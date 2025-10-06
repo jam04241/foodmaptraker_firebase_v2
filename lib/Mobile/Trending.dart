@@ -1,9 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:foodtracker_firebase/Properties/trendingAssets/post_modal.dart';
 import 'package:foodtracker_firebase/Properties/trendingAssets/review_modal.dart';
 import 'package:foodtracker_firebase/model/Users.dart';
+import 'package:foodtracker_firebase/model/postUser.dart';
 
 class NavTrendingPage extends StatefulWidget {
   const NavTrendingPage({super.key});
@@ -16,7 +18,15 @@ class _TrendingsState extends State<NavTrendingPage> {
   final TextEditingController postController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  String? currentUserId;
+  String? currentUserName;
   String sortOrder = "Highest First";
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrentUser();
+  }
 
   @override
   void dispose() {
@@ -24,15 +34,49 @@ class _TrendingsState extends State<NavTrendingPage> {
     super.dispose();
   }
 
+  Future<void> _getCurrentUser() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final userDoc = await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        if (userDoc.exists) {
+          setState(() {
+            currentUserId = user.uid;
+            currentUserName = userDoc.data()?['userName'] ?? 'User';
+          });
+        }
+      }
+    } catch (e) {
+      print('Error getting current user: $e');
+    }
+  }
+
   // Open Post Modal
   void openPostModal(BuildContext context) {
+    // Check if user data is available
+    if (currentUserId == null || currentUserName == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please log in to create a post'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => PostModal(postController: postController),
+      builder: (context) => PostModal(
+        postController: postController,
+        currentUserId: currentUserId!, // ✅ PASS USER ID
+        currentUserName: currentUserName!, // ✅ PASS USERNAME
+      ),
     ).then((_) {
-      // Refresh posts when modal closes
       setState(() {});
     });
   }
@@ -67,9 +111,17 @@ class _TrendingsState extends State<NavTrendingPage> {
   // Toggle like status
   Future<void> toggleLike(PostUser post) async {
     try {
+      // ✅ USE ACTUAL CURRENT USER ID
+      if (currentUserId == null) return;
+
+      final isCurrentlyLiked = post.likedBy.contains(currentUserId);
+
       await _firestore.collection('posts').doc(post.id).update({
-        'isLiked': !(post.isLiked ?? false),
-        'hearts': (post.hearts ?? 0) + ((post.isLiked ?? false) ? -1 : 1),
+        'isLiked': !isCurrentlyLiked,
+        'hearts': isCurrentlyLiked ? (post.hearts - 1) : (post.hearts + 1),
+        'likedBy': isCurrentlyLiked
+            ? FieldValue.arrayRemove([currentUserId])
+            : FieldValue.arrayUnion([currentUserId]),
       });
     } catch (e) {
       print('Error toggling like: $e');
@@ -126,6 +178,7 @@ class _TrendingsState extends State<NavTrendingPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // In trendingCard widget, replace the user section:
           Row(
             children: [
               CircleAvatar(
@@ -138,7 +191,7 @@ class _TrendingsState extends State<NavTrendingPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "User",
+                    post.userName, // Use actual username from post
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
@@ -149,7 +202,7 @@ class _TrendingsState extends State<NavTrendingPage> {
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   Text(
-                    "Restaurant",
+                    post.restaurantName, // Use actual restaurant name
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
