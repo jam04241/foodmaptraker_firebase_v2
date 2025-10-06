@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "444989021729",
-    "project_id": "foodtracking106l",
-    "storage_bucket": "foodtracking106l.firebasestorage.app"
+    "project_number": "413421746127",
+    "project_id": "foodtracktester",
+    "storage_bucket": "foodtracktester.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:444989021729:android:a94923e8c72edc02ca8d60",
+        "mobilesdk_app_id": "1:413421746127:android:b5cf56e1afc503db0e44ba",
         "android_client_info": {
           "package_name": "com.example.foodtracker_firebase"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBdQZzE7hiIJWG14tY0ASmFjTTTaD849Zs"
+          "current_key": "AIzaSyB6KBMdU3dr0BUKnJYUU6pwtvvjoGvGqTI"
         }
       ],
       "services": {

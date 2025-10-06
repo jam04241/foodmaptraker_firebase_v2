@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:foodtracker_firebase/Loginform/log_register.dart';
+import 'package:foodtracker_firebase/model/firebase_collection_initializer.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -18,6 +19,8 @@ class _RegisterState extends State<Register> {
 
   String errorMessage = "";
   bool isError = false;
+  bool isLoading = false;
+
   @override
   void dispose() {
     usernameController.dispose();
@@ -28,6 +31,15 @@ class _RegisterState extends State<Register> {
   }
 
   Future<void> register() async {
+    // Validation
+    if (usernameController.text.isEmpty) {
+      setState(() {
+        errorMessage = "Please enter a username";
+        isError = true;
+      });
+      return;
+    }
+
     if (passwordController.text != confirmPasswordController.text) {
       setState(() {
         errorMessage = "Passwords do not match";
@@ -36,11 +48,42 @@ class _RegisterState extends State<Register> {
       return;
     }
 
+    if (passwordController.text.length < 6) {
+      setState(() {
+        errorMessage = "Password must be at least 6 characters";
+        isError = true;
+      });
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+      isError = false;
+    });
+
     try {
-      await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: emailController.text.trim(),
-        password: passwordController.text.trim(),
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
       );
+
+      // Create user in Firebase Auth
+      final UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: emailController.text.trim(),
+            password: passwordController.text.trim(),
+          );
+
+      // ✅ CHANGED: Use FirebaseCollectionInitializer instead of FirebaseUserUploader
+      await FirebaseCollectionInitializer.saveUserToFirestore(
+        userCredential.user!,
+        usernameController.text.trim(),
+      );
+
+      // Close loading dialog
+      Navigator.pop(context);
 
       // Success → go to Login
       Navigator.pushReplacement(
@@ -48,14 +91,18 @@ class _RegisterState extends State<Register> {
         MaterialPageRoute(builder: (context) => const LoginDesign()),
       );
     } on FirebaseAuthException catch (e) {
+      Navigator.pop(context); // Close loading dialog
       setState(() {
         errorMessage = e.message ?? "An unknown error occurred";
         isError = true;
+        isLoading = false;
       });
     } catch (e) {
+      Navigator.pop(context); // Close loading dialog
       setState(() {
         errorMessage = "An unknown error occurred";
         isError = true;
+        isLoading = false;
       });
     }
   }
@@ -105,20 +152,31 @@ class _RegisterState extends State<Register> {
                         ),
                       ),
                       const SizedBox(height: 30),
-                      if (isError) const SizedBox(height: 20),
+
                       if (isError)
-                        Text(
-                          errorMessage,
-                          style: const TextStyle(
-                            color: Colors.redAccent,
-                            fontSize: 14,
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.redAccent.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.redAccent),
+                          ),
+                          child: Text(
+                            errorMessage,
+                            style: const TextStyle(
+                              color: Colors.redAccent,
+                              fontSize: 14,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                         ),
-                      const SizedBox(height: 20),
+
+                      if (isError) const SizedBox(height: 20),
+
                       // Username
                       _buildTextField(
                         usernameController,
-                        Icons.account_circle,
+                        Icons.person,
                         "Create your Username",
                       ),
                       const SizedBox(height: 20),
@@ -128,6 +186,7 @@ class _RegisterState extends State<Register> {
                         emailController,
                         Icons.email,
                         "Email Address",
+                        keyboardType: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: 20),
 
@@ -135,7 +194,7 @@ class _RegisterState extends State<Register> {
                       _buildTextField(
                         passwordController,
                         Icons.lock,
-                        "Enter your Password",
+                        "Enter your Password (min. 6 characters)",
                         obscureText: true,
                       ),
                       const SizedBox(height: 20),
@@ -147,9 +206,7 @@ class _RegisterState extends State<Register> {
                         "Confirm Password",
                         obscureText: true,
                       ),
-                      const SizedBox(height: 20),
-
-                      // Error message
+                      const SizedBox(height: 30),
 
                       // Register Button
                       SizedBox(
@@ -164,7 +221,7 @@ class _RegisterState extends State<Register> {
                             borderRadius: BorderRadius.circular(50),
                           ),
                           child: ElevatedButton(
-                            onPressed: register, // <-- your register function
+                            onPressed: isLoading ? null : register,
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               minimumSize: const Size(400, 60),
@@ -173,22 +230,31 @@ class _RegisterState extends State<Register> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(50),
                                 side: const BorderSide(
-                                  // White border
                                   color: Colors.white,
                                   width: 2,
                                 ),
                               ),
                             ),
-                            child: const Text(
-                              "Register",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Montserrat',
-                                color: Colors
-                                    .white, // white text fits gradient better
-                              ),
-                            ),
+                            child: isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : const Text(
+                                    "Register",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      fontFamily: 'Montserrat',
+                                      color: Colors.white,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
@@ -208,15 +274,17 @@ class _RegisterState extends State<Register> {
     IconData icon,
     String hint, {
     bool obscureText = false,
+    TextInputType keyboardType = TextInputType.text,
   }) {
     return SizedBox(
       width: 500,
       child: TextField(
         controller: controller,
         obscureText: obscureText,
+        keyboardType: keyboardType,
         style: const TextStyle(color: Colors.black),
         decoration: InputDecoration(
-          prefix: Icon(icon),
+          prefixIcon: Icon(icon, color: Colors.black54),
           filled: true,
           fillColor: Colors.white,
           hintText: hint,

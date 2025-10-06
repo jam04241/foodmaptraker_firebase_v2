@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:foodtracker_firebase/Mobile/Mainframe.dart';
+import 'package:foodtracker_firebase/model/firebase_collection_initializer.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -45,7 +46,7 @@ class _LoginState extends State<Login> {
     }
   }
 
-  Future checkLogin(email, password) async {
+  Future<void> checkLogin(email, password) async {
     showDialog(
       context: context,
       useRootNavigator: false,
@@ -54,16 +55,25 @@ class _LoginState extends State<Login> {
     );
 
     try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
+      final UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      // ✅ UPDATED: Get user data from Firestore
+      final userData = await FirebaseCollectionInitializer.getUserData(
+        userCredential.user!.uid,
       );
+
+      if (userData != null) {
+        // ✅ UPDATED: Use 'userName' instead of 'displayName'
+        print('👤 User logged in: ${userData['userName']}');
+      }
 
       Navigator.pop(context);
       setState(() {
         errorMessage = "";
         isError = false;
       });
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const Mainframe()),
