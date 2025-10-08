@@ -1,16 +1,17 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:foodtracker_firebase/model/Users.dart';
 import 'package:foodtracker_firebase/model/postUser.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloudinary_public/cloudinary_public.dart';
+import 'package:foodtracker_firebase/services/cloudinary_service.dart';
 
 class PostModal extends StatefulWidget {
   final TextEditingController postController;
-  final String currentUserId; // ✅ DECLARE AS CLASS FIELDS
-  final String currentUserName; // ✅ DECLARE AS CLASS FIELDS
+  final String currentUserId;
+  final String currentUserName;
 
   const PostModal({
     super.key,
@@ -27,11 +28,19 @@ class _PostModalState extends State<PostModal> {
   final TextEditingController locationController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController restaurantController = TextEditingController();
+  final CloudinaryService _cloudinaryService = CloudinaryService();
 
   Uint8List? _imageBytes;
   String? _imageName;
   int _rating = 0;
   bool _isLoading = false;
+
+  // Cloudinary Service
+  final CloudinaryPublic _cloudinary = CloudinaryPublic(
+    'ddxgbymvn', // Your cloud name
+    'Cloudinary_Foodpost', // Your upload preset
+    cache: false,
+  );
 
   // Debug logging function
   void _debugLog(String message) {
@@ -72,32 +81,52 @@ class _PostModalState extends State<PostModal> {
     }
 
     try {
-      _debugLog('Starting image upload to Firebase Storage');
-      final storage = FirebaseStorage.instance;
-      final fileName =
-          'posts/${DateTime.now().millisecondsSinceEpoch}_${_imageName ?? 'image'}';
-      final ref = storage.ref().child(fileName);
+      _debugLog('Starting image upload to Cloudinary');
 
-      _debugLog('Uploading file: $fileName');
-      final uploadTask = ref.putData(_imageBytes!);
-      final snapshot = await uploadTask;
-      _debugLog('Upload completed, getting download URL');
-      final downloadUrl = await snapshot.ref.getDownloadURL();
+      // Use the CloudinaryService's uploadImageBytes method with timeout
+      final uploadFuture = _cloudinaryService.uploadImageBytes(
+        _imageBytes!,
+        folder: 'cloudinary_foodpost', // optional folder
+      );
 
-      _debugLog('Image uploaded successfully: $downloadUrl');
-      return downloadUrl;
-    } catch (e) {
-      _debugLog('Error uploading image: $e');
+      // Apply timeout of 20 seconds
+      final String imageUrl = await uploadFuture.timeout(
+        const Duration(seconds: 20),
+        onTimeout: () {
+          throw TimeoutException(
+            'Image upload timed out after 20 seconds. Please check your network connection.',
+          );
+        },
+      );
+
+      _debugLog('Cloudinary upload completed: $imageUrl');
+      return imageUrl;
+    } on TimeoutException catch (e) {
+      _debugLog('Upload timeout: $e');
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error uploading image: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message ?? 'Upload timeout'),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+      return null;
+    } catch (e) {
+      _debugLog('Error uploading image to Cloudinary: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error uploading image: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
       return null;
     }
   }
 
-  // Then in your _savePostToFirestore method, use these parameters:
   Future<void> _savePostToFirestore(String imageUrl) async {
     try {
       _debugLog('Starting Firestore save operation');
@@ -113,8 +142,8 @@ class _PostModalState extends State<PostModal> {
         location: locationController.text.trim(),
         rates: _rating.toString(),
         images: imageUrl,
-        userId: widget.currentUserId, // ✅ USE THE PASSED USER ID
-        userName: widget.currentUserName, // ✅ USE THE PASSED USERNAME
+        userId: widget.currentUserId,
+        userName: widget.currentUserName,
         restaurantName: restaurantController.text.trim().isEmpty
             ? 'Restaurant'
             : restaurantController.text.trim(),
@@ -159,14 +188,23 @@ class _PostModalState extends State<PostModal> {
     _debugLog('Starting post creation process');
 
     try {
-      // Step 1: Upload image
-      _debugLog('Step 1: Uploading image');
+      // Step 1: Upload image to Cloudinary
+      _debugLog('Step 1: Uploading image to Cloudinary');
       String? imageUrl = await _uploadImage();
       _debugLog('Image upload result: $imageUrl');
 
+      // If upload was cancelled due to timeout, stop here
+      if (imageUrl == null) {
+        _debugLog('Image upload failed or was cancelled');
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
       // Step 2: Save to Firestore
       _debugLog('Step 2: Saving to Firestore');
-      await _savePostToFirestore(imageUrl ?? '');
+      await _savePostToFirestore(imageUrl);
 
       // Step 3: Success
       _debugLog('Step 3: Post created successfully');
@@ -227,7 +265,7 @@ class _PostModalState extends State<PostModal> {
       builder: (context, scrollController) {
         return Container(
           decoration: const BoxDecoration(
-            color: Color(0xff2f4a5d), // ✅ Changed to dark blue
+            color: Color(0xff2f4a5d),
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -242,14 +280,11 @@ class _PostModalState extends State<PostModal> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white, // ✅ White text
+                        color: Colors.white,
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(
-                        Icons.close,
-                        color: Colors.white,
-                      ), // ✅ White icon
+                      icon: const Icon(Icons.close, color: Colors.white),
                       onPressed: _isLoading
                           ? null
                           : () => Navigator.pop(context),
@@ -304,20 +339,16 @@ class _PostModalState extends State<PostModal> {
                     TextField(
                       controller: restaurantController,
                       enabled: !_isLoading,
-                      style: const TextStyle(
-                        color: Colors.white,
-                      ), // ✅ White text
+                      style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         hintText: "Restaurant Name",
-                        hintStyle: const TextStyle(
-                          color: Colors.white70,
-                        ), // ✅ Hint color
+                        hintStyle: const TextStyle(color: Colors.white70),
                         prefixIcon: const Icon(
                           Icons.restaurant,
                           color: Colors.white70,
                         ),
                         filled: true,
-                        fillColor: const Color(0xff3a556e), // ✅ Darker blue
+                        fillColor: const Color(0xff3a556e),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -343,16 +374,12 @@ class _PostModalState extends State<PostModal> {
                       controller: descriptionController,
                       maxLines: 5,
                       enabled: !_isLoading,
-                      style: const TextStyle(
-                        color: Colors.white,
-                      ), // ✅ White text
+                      style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         hintText: "What's on your mind?",
-                        hintStyle: const TextStyle(
-                          color: Colors.white70,
-                        ), // ✅ Hint color
+                        hintStyle: const TextStyle(color: Colors.white70),
                         filled: true,
-                        fillColor: const Color(0xff3a556e), // ✅ Darker blue
+                        fillColor: const Color(0xff3a556e),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -377,20 +404,16 @@ class _PostModalState extends State<PostModal> {
                     TextField(
                       controller: locationController,
                       enabled: !_isLoading,
-                      style: const TextStyle(
-                        color: Colors.white,
-                      ), // ✅ White text
+                      style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         hintText: "Add Location",
-                        hintStyle: const TextStyle(
-                          color: Colors.white70,
-                        ), // ✅ Hint color
+                        hintStyle: const TextStyle(color: Colors.white70),
                         prefixIcon: const Icon(
                           Icons.location_on,
                           color: Colors.white70,
                         ),
                         filled: true,
-                        fillColor: const Color(0xff3a556e), // ✅ Darker blue
+                        fillColor: const Color(0xff3a556e),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -417,7 +440,7 @@ class _PostModalState extends State<PostModal> {
                         const Text(
                           "Rate:",
                           style: TextStyle(fontSize: 16, color: Colors.white),
-                        ), // ✅ White text
+                        ),
                         const SizedBox(width: 10),
                         Row(
                           children: List.generate(5, (index) {
@@ -459,9 +482,7 @@ class _PostModalState extends State<PostModal> {
                         style: const TextStyle(color: Colors.white),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(
-                          0xff547792,
-                        ), // ✅ Accent blue
+                        backgroundColor: const Color(0xff547792),
                         foregroundColor: Colors.white,
                         minimumSize: const Size(double.infinity, 50),
                       ),
@@ -472,7 +493,7 @@ class _PostModalState extends State<PostModal> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: const Color(0xff3a556e), // ✅ Darker blue
+                        color: const Color(0xff3a556e),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: const Color(0xff547792)),
                       ),
@@ -519,6 +540,13 @@ class _PostModalState extends State<PostModal> {
                               color: Colors.white70,
                             ),
                           ),
+                          Text(
+                            "Storage: Cloudinary",
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.white70,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -535,7 +563,7 @@ class _PostModalState extends State<PostModal> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: _isLoading
                           ? const Color(0xff3a556e)
-                          : const Color(0xff547792), // ✅ Accent blue
+                          : const Color(0xff547792),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -571,7 +599,7 @@ class _PostModalState extends State<PostModal> {
                               Icon(Icons.cloud_upload, color: Colors.white),
                               SizedBox(width: 8),
                               Text(
-                                "Post to Firebase",
+                                "Post to Cloudinary",
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
