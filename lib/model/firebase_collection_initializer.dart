@@ -14,6 +14,7 @@ class FirebaseCollectionInitializer {
       await _initializePostsCollection(firestore);
       await _initializeCommentsCollection(firestore);
       await _initializeHeartReactionsCollection(firestore);
+      await _initializeNotificationsCollection(firestore); // ADD THIS LINE
 
       print('✅ All Firebase collections initialized successfully!');
     } catch (e) {
@@ -244,6 +245,70 @@ class FirebaseCollectionInitializer {
     );
   }
 
+  // ==================== NOTIFICATIONS COLLECTION ====================
+  static Future<void> _initializeNotificationsCollection(
+    FirebaseFirestore firestore,
+  ) async {
+    final snapshot = await firestore.collection('notifications').limit(1).get();
+    if (snapshot.docs.isNotEmpty) {
+      print('🔔 Notifications collection already exists.');
+      return;
+    }
+
+    print('📝 Creating notifications collection with sample data...');
+
+    // Sample notifications data
+    final sampleNotifications = [
+      {
+        'numseq': 1,
+        'createAt': Timestamp.now(),
+        'username': 'John Doe',
+        'message': 'Jane Smith react the review on John Doe',
+      },
+      {
+        'numseq': 2,
+        'createAt': Timestamp.fromDate(
+          DateTime.now().subtract(const Duration(hours: 1)),
+        ),
+        'username': 'Jane Smith',
+        'message': 'Mike Johnson comment on Jane Smith\'s post',
+      },
+      {
+        'numseq': 3,
+        'createAt': Timestamp.fromDate(
+          DateTime.now().subtract(const Duration(hours: 2)),
+        ),
+        'username': 'Mike Johnson',
+        'message': 'Added a new post',
+      },
+      {
+        'numseq': 4,
+        'createAt': Timestamp.fromDate(
+          DateTime.now().subtract(const Duration(hours: 3)),
+        ),
+        'username': 'John Doe',
+        'message': 'Jane Smith react the review on Mike Johnson',
+      },
+      {
+        'numseq': 5,
+        'createAt': Timestamp.fromDate(
+          DateTime.now().subtract(const Duration(hours: 4)),
+        ),
+        'username': 'Jane Smith',
+        'message': 'Added a new post',
+      },
+    ];
+
+    // Add sample notifications
+    for (var notificationData in sampleNotifications) {
+      await firestore.collection('notifications').add(notificationData);
+    }
+
+    print(
+      '✅ Created notifications collection with ${sampleNotifications.length} sample notifications',
+    );
+  }
+
   // ==================== HEART REACTIONS COLLECTION ====================
   static Future<void> _initializeHeartReactionsCollection(
     FirebaseFirestore firestore,
@@ -437,6 +502,7 @@ class FirebaseCollectionInitializer {
     required String userName,
     String? userPhotoURL,
     required bool isLiking,
+    required String postOwnerUsername,
   }) async {
     try {
       final FirebaseFirestore firestore = FirebaseFirestore.instance;

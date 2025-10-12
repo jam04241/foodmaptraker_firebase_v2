@@ -1,5 +1,8 @@
+//notification.dart - the main page for notification
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:foodtracker_firebase/Properties/notificationAssets/notificationBox.dart';
+import 'package:foodtracker_firebase/services/database_service.dart'; // Import your service
 
 class NavNotificationsPage extends StatefulWidget {
   const NavNotificationsPage({super.key});
@@ -10,53 +13,45 @@ class NavNotificationsPage extends StatefulWidget {
 
 class _NavNotificationsPageState extends State<NavNotificationsPage> {
   String sortOrder = "Newest"; // Default sort option
+  final DatabaseService _databaseService = DatabaseService();
 
-  List<Map<String, dynamic>> notifications = [
-    {
-      "profileImage": "images/post6.jpg",
-      "username": "Stephen Tatskie",
-      "activity": "Reacted to your Review",
-      "timestamp": "1h ago",
-      "numseq": 1,
-    },
-    {
-      "profileImage": "images/mommyjupeta.jpg",
-      "username": "Mommy Jupeta",
-      "activity": "commented on your photo",
-      "timestamp": "2h ago",
-      "numseq": 2,
-    },
-    {
-      "profileImage": "images/JL.jpg",
-      "username": "John Hope Lloyd",
-      "activity": "React to your Review",
-      "timestamp": "3h ago",
-      "numseq": 3,
-    },
-    {
-      "profileImage": "images/JL.jpg",
-      "username": "John Hope Lloyd",
-      "activity": "Reacted to your Review",
-      "timestamp": "4h ago",
-      "numseq": 4,
-    },
-    {
-      "profileImage": "images/mommyjupeta.jpg",
-      "username": "Mommy Jupeta",
-      "activity": "commented on your Review",
-      "timestamp": "5h ago",
-      "numseq": 5,
-    },
-  ];
+  // Firestore query for notifications
+  Stream<QuerySnapshot> get notificationsStream {
+    if (sortOrder == "Newest") {
+      return FirebaseFirestore.instance
+          .collection('notifications')
+          .orderBy('numseq', descending: true) // Newest first (highest numseq)
+          .snapshots();
+    } else {
+      return FirebaseFirestore.instance
+          .collection('notifications')
+          .orderBy('numseq', descending: false) // Oldest first (lowest numseq)
+          .snapshots();
+    }
+  }
 
-  void _sortNotifications() {
+  void _sortNotifications(String value) {
     setState(() {
-      if (sortOrder == "Newest") {
-        notifications.sort((a, b) => a["numseq"].compareTo(b["numseq"]));
-      } else {
-        notifications.sort((a, b) => b["numseq"].compareTo(a["numseq"]));
-      }
+      sortOrder = value;
     });
+    // The stream will automatically update due to the getter
+  }
+
+  // Helper function to format timestamp
+  String getTimeAgo(Timestamp timestamp) {
+    final now = DateTime.now();
+    final postTime = timestamp.toDate();
+    final difference = now.difference(postTime);
+
+    if (difference.inDays > 0) {
+      return "${difference.inDays}d ago";
+    } else if (difference.inHours > 0) {
+      return "${difference.inHours}h ago";
+    } else if (difference.inMinutes > 0) {
+      return "${difference.inMinutes}m ago";
+    } else {
+      return "Just now";
+    }
   }
 
   @override
@@ -98,29 +93,86 @@ class _NavNotificationsPageState extends State<NavNotificationsPage> {
               ],
               onChanged: (value) {
                 if (value != null) {
-                  setState(() {
-                    sortOrder = value;
-                  });
-                  _sortNotifications();
+                  _sortNotifications(value);
                 }
               },
             ),
           ),
 
-          // Expanded list of notifications
+          // Expanded list of notifications from Firestore
           Expanded(
-            child: ListView(
-              children: notifications
-                  .map(
-                    (n) => NotificationBox(
-                      profileImage: n["profileImage"],
-                      username: n["username"],
-                      activity: n["activity"],
-                      timestamp: n["timestamp"],
-                      numseq: n["numseq"].toString(),
+            child: StreamBuilder<QuerySnapshot>(
+              stream: notificationsStream,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      'Error: ${snapshot.error}',
+                      style: const TextStyle(color: Colors.white),
                     ),
-                  )
-                  .toList(),
+                  );
+                }
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  );
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.notifications_none,
+                          size: 80,
+                          color: Colors.white.withOpacity(0.5),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No notifications yet',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.7),
+                            fontSize: 18,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Your notifications will appear here',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.5),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                final notifications = snapshot.data!.docs;
+
+                return ListView.builder(
+                  itemCount: notifications.length,
+                  itemBuilder: (context, index) {
+                    final notification = notifications[index];
+                    final data = notification.data() as Map<String, dynamic>;
+
+                    return NotificationBox(
+                      profileImage: "images/profile.png", // Default image
+                      username: data['username'] ?? 'User',
+                      activity: data['message'] ?? 'New activity',
+                      timestamp: getTimeAgo(data['createAt'] as Timestamp),
+                      numseq: data['numseq'].toString(),
+                      // You can add more fields if needed
+                      notificationId:
+                          notification.id, // For potential delete functionality
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],

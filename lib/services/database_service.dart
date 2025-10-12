@@ -6,13 +6,18 @@ import 'package:foodtracker_firebase/model/postUser.dart';
 class DatabaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Users Collection
+  // Collections
   final CollectionReference usersCollection = FirebaseFirestore.instance
       .collection('users');
   final CollectionReference postsCollection = FirebaseFirestore.instance
       .collection('posts');
   final CollectionReference commentsCollection = FirebaseFirestore.instance
       .collection('comments');
+  final CollectionReference heartReactionsCollection = FirebaseFirestore
+      .instance
+      .collection('heartReactions');
+  final CollectionReference notificationsCollection = FirebaseFirestore.instance
+      .collection('notifications');
 
   // User Operations
   Future<void> saveUser(User user) async {
@@ -56,13 +61,11 @@ class DatabaseService {
       final postRef = postsCollection.doc(postId);
 
       if (isLiked) {
-        // Add like
         await postRef.update({
           'hearts': FieldValue.increment(1),
           'likedBy': FieldValue.arrayUnion([userId]),
         });
       } else {
-        // Remove like
         await postRef.update({
           'hearts': FieldValue.increment(-1),
           'likedBy': FieldValue.arrayRemove([userId]),
@@ -72,6 +75,56 @@ class DatabaseService {
       print('Error updating post likes: $e');
       rethrow;
     }
+  }
+
+  // ==================== NOTIFICATION FUNCTIONS ====================
+
+  // ✅ FIXED: Make these instance methods, not static
+  Future<void> addNotification({
+    required String username,
+    required String message,
+  }) async {
+    try {
+      // Get the next numseq by counting existing notifications
+      final notificationsCount = await notificationsCollection.count().get();
+
+      final int numseq = notificationsCount.count! + 1;
+
+      final notificationData = {
+        'numseq': numseq,
+        'createAt': Timestamp.now(),
+        'username': username,
+        'message': message,
+      };
+
+      await notificationsCollection.add(notificationData);
+      print('✅ Notification added: $message');
+    } catch (e) {
+      print('❌ Error adding notification: $e');
+      rethrow;
+    }
+  }
+
+  // ✅ FIXED: Make these instance methods
+  Future<void> createReactionNotification({
+    required String reactingUsername,
+    required String postOwnerUsername,
+  }) async {
+    final message = '$reactingUsername react the review on $postOwnerUsername';
+    await addNotification(username: reactingUsername, message: message);
+  }
+
+  Future<void> createCommentNotification({
+    required String commentingUsername,
+    required String postOwnerUsername,
+  }) async {
+    final message = '$commentingUsername comment on $postOwnerUsername\'s post';
+    await addNotification(username: commentingUsername, message: message);
+  }
+
+  Future<void> createPostNotification({required String username}) async {
+    final message = 'Added a new post';
+    await addNotification(username: username, message: message);
   }
 
   // Comment Operations

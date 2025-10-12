@@ -4,8 +4,10 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:foodtracker_firebase/Properties/trendingAssets/post_modal.dart';
 import 'package:foodtracker_firebase/Properties/trendingAssets/review_modal.dart';
-import 'package:foodtracker_firebase/model/Users.dart';
 import 'package:foodtracker_firebase/model/postUser.dart';
+import 'package:foodtracker_firebase/model/firebase_collection_initializer.dart';
+import 'package:foodtracker_firebase/services/database_service.dart';
+import 'package:foodtracker_firebase/services/time_utils.dart';
 
 class NavTrendingPage extends StatefulWidget {
   const NavTrendingPage({super.key});
@@ -17,10 +19,11 @@ class NavTrendingPage extends StatefulWidget {
 class _TrendingsState extends State<NavTrendingPage> {
   final TextEditingController postController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final DatabaseService _databaseService = DatabaseService();
 
   String? currentUserId;
   String? currentUserName;
-  String sortOrder = "Newest Post"; // ✅ CHANGED DEFAULT TO NEWEST POST
+  String sortOrder = "Newest Post";
 
   @override
   void initState() {
@@ -56,7 +59,6 @@ class _TrendingsState extends State<NavTrendingPage> {
 
   // Open Post Modal
   void openPostModal(BuildContext context) {
-    // Check if user data is available
     if (currentUserId == null || currentUserName == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -73,8 +75,8 @@ class _TrendingsState extends State<NavTrendingPage> {
       backgroundColor: Colors.transparent,
       builder: (context) => PostModal(
         postController: postController,
-        currentUserId: currentUserId!, // ✅ PASS USER ID
-        currentUserName: currentUserName!, // ✅ PASS USERNAME
+        currentUserId: currentUserId!,
+        currentUserName: currentUserName!,
       ),
     ).then((_) {
       setState(() {});
@@ -87,6 +89,7 @@ class _TrendingsState extends State<NavTrendingPage> {
       return ReviewModal(
         postId: post.id,
         restaurantName: "Restaurant",
+        postOwnerUsername: post.userName,
         onSubmit: (double rating, String comment) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -95,6 +98,8 @@ class _TrendingsState extends State<NavTrendingPage> {
             ),
           );
         },
+        currentUserId: currentUserId ?? '',
+        currentUserName: currentUserName ?? '',
       );
     }
 
@@ -102,13 +107,15 @@ class _TrendingsState extends State<NavTrendingPage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: buildReviewModal, // Use the separate builder function
+      builder: buildReviewModal,
     ).then((value) {
       setState(() {});
     });
   }
 
-  // Toggle like status
+  // ✅ FIXED: Remove the duplicate toggleHeartReaction method and use the one from FirebaseCollectionInitializer
+
+  // Toggle like status with notification
   Future<void> toggleLike(PostUser post) async {
     try {
       // ✅ USE ACTUAL CURRENT USER ID
@@ -116,44 +123,24 @@ class _TrendingsState extends State<NavTrendingPage> {
 
       final isCurrentlyLiked = post.likedBy.contains(currentUserId);
 
-      await _firestore.collection('posts').doc(post.id).update({
-        'isLiked': !isCurrentlyLiked,
-        'hearts': isCurrentlyLiked ? (post.hearts - 1) : (post.hearts + 1),
-        'likedBy': isCurrentlyLiked
-            ? FieldValue.arrayRemove([currentUserId])
-            : FieldValue.arrayUnion([currentUserId]),
-      });
+      // ✅ FIXED: Call the method from FirebaseCollectionInitializer directly
+      await FirebaseCollectionInitializer.toggleHeartReaction(
+        postId: post.id,
+        userId: currentUserId!,
+        userName: currentUserName!,
+        userPhotoURL: null,
+        isLiking: !isCurrentlyLiked,
+        postOwnerUsername:
+            post.userName, // ✅ FIXED: This parameter is now defined
+      );
+
+      // ✅ USE ACTUAL USERNAME FOR NOTIFICATION
+      await _databaseService.createReactionNotification(
+        reactingUsername: currentUserName!,
+        postOwnerUsername: post.userName!,
+      );
     } catch (e) {
       print('Error toggling like: $e');
-    }
-  }
-
-  // Get time ago from timestamp
-  String getTimeAgo(dynamic timestamp) {
-    if (timestamp == null) return "Recently";
-
-    DateTime postTime;
-
-    // Handle both Timestamp and DateTime
-    if (timestamp is Timestamp) {
-      postTime = timestamp.toDate();
-    } else if (timestamp is DateTime) {
-      postTime = timestamp;
-    } else {
-      return "Recently";
-    }
-
-    final now = DateTime.now();
-    final difference = now.difference(postTime);
-
-    if (difference.inDays > 0) {
-      return "${difference.inDays}d ago";
-    } else if (difference.inHours > 0) {
-      return "${difference.inHours}h ago";
-    } else if (difference.inMinutes > 0) {
-      return "${difference.inMinutes}m ago";
-    } else {
-      return "Just now";
     }
   }
 
@@ -169,7 +156,7 @@ class _TrendingsState extends State<NavTrendingPage> {
       margin: const EdgeInsets.only(top: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xff2f4a5d), // ✅ BACKGROUND COLOR CHANGED
+        color: const Color(0xff2f4a5d),
         borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
@@ -195,7 +182,7 @@ class _TrendingsState extends State<NavTrendingPage> {
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
-                      color: Colors.white, // ✅ Text color for better contrast
+                      color: Colors.white,
                     ),
                   ),
                   Text(
@@ -207,11 +194,13 @@ class _TrendingsState extends State<NavTrendingPage> {
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.white, // ✅ Text color for better contrast
+                      color: Colors.white,
                     ),
                   ),
                   Text(
-                    getTimeAgo(post.timestamp),
+                    TimeUtils.getTimeAgo(
+                      post.timestamp,
+                    ), // ✅ FIXED: Use TimeUtils
                     style: const TextStyle(fontSize: 11, color: Colors.white70),
                   ),
                 ],
@@ -262,7 +251,7 @@ class _TrendingsState extends State<NavTrendingPage> {
                 rating.toStringAsFixed(1),
                 style: const TextStyle(
                   fontSize: 13,
-                  color: Colors.white, // ✅ Text color for better contrast
+                  color: Colors.white,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -277,7 +266,7 @@ class _TrendingsState extends State<NavTrendingPage> {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Colors.white, // ✅ Text color for better contrast
+              color: Colors.white,
             ),
           ),
 
@@ -325,14 +314,14 @@ class _TrendingsState extends State<NavTrendingPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xff3a556e), // ✅ Slightly lighter background
+                color: const Color(0xff3a556e),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Text(
                 "What's on your mind?",
                 style: TextStyle(
                   fontSize: 13,
-                  color: Colors.white70, // ✅ Lighter text color
+                  color: Colors.white70,
                   fontStyle: FontStyle.italic,
                 ),
               ),
@@ -375,7 +364,6 @@ class _TrendingsState extends State<NavTrendingPage> {
                 borderRadius: BorderRadius.circular(12),
               ),
               itemBuilder: (BuildContext context) => [
-                // ✅ CHANGED TO NEWEST POST
                 PopupMenuItem(
                   value: "Newest Post",
                   child: Row(
@@ -386,7 +374,6 @@ class _TrendingsState extends State<NavTrendingPage> {
                     ],
                   ),
                 ),
-                // ✅ CHANGED TO OLDEST POST
                 PopupMenuItem(
                   value: "Oldest Post",
                   child: Row(
@@ -426,7 +413,6 @@ class _TrendingsState extends State<NavTrendingPage> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-
         child: Column(
           children: [
             // Create Post Button
@@ -483,10 +469,7 @@ class _TrendingsState extends State<NavTrendingPage> {
             StreamBuilder<QuerySnapshot>(
               stream: _firestore
                   .collection('posts')
-                  .orderBy(
-                    'timestamp',
-                    descending: true,
-                  ) // Default: newest first
+                  .orderBy('timestamp', descending: true)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
@@ -531,10 +514,7 @@ class _TrendingsState extends State<NavTrendingPage> {
                   return PostUser.fromJson(data);
                 }).toList();
 
-                // ✅ UPDATED SORTING LOGIC FOR TIMESTAMP
                 if (sortOrder == "Newest Post") {
-                  // Already sorted by newest first from Firestore, no need to re-sort
-                  // Or reverse if needed
                   posts.sort((a, b) => b.timestamp.compareTo(a.timestamp));
                 } else if (sortOrder == "Oldest Post") {
                   posts.sort((a, b) => a.timestamp.compareTo(b.timestamp));

@@ -7,6 +7,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:foodtracker_firebase/model/postUser.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
 import 'package:foodtracker_firebase/services/cloudinary_service.dart';
+import 'package:foodtracker_firebase/services/database_service.dart';
 
 class PostModal extends StatefulWidget {
   final TextEditingController postController;
@@ -29,6 +30,7 @@ class _PostModalState extends State<PostModal> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController restaurantController = TextEditingController();
   final CloudinaryService _cloudinaryService = CloudinaryService();
+  final DatabaseService databaseService = DatabaseService();
 
   Uint8List? _imageBytes;
   String? _imageName;
@@ -156,6 +158,13 @@ class _PostModalState extends State<PostModal> {
 
       _debugLog('Post data: ${postUser.toJson()}');
       await postsCollection.doc(postId).set(postUser.toJson());
+
+      // ✅ FIXED: You need to create DatabaseService instance
+
+      await databaseService.createPostNotification(
+        username: widget.currentUserName,
+      );
+
       _debugLog('Post successfully saved to Firestore');
     } catch (e) {
       _debugLog('Error saving to Firestore: $e');

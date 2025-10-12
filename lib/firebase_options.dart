@@ -41,49 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAsVWoRgPwiPBXSDPeIgwalbI1JJxfSKi8',
-    appId: '1:413421746127:web:a08890a59eec0f8f0e44ba',
-    messagingSenderId: '413421746127',
-    projectId: 'foodtracktester',
-    authDomain: 'foodtracktester.firebaseapp.com',
-    storageBucket: 'foodtracktester.firebasestorage.app',
-    measurementId: 'G-PDH6X062ST',
+    apiKey: 'AIzaSyBJyWY0aGf1R4CZem4jgFJHD13JubSyPXg',
+    appId: '1:1095712201757:web:bbcf66a2dfe7977022faf4',
+    messagingSenderId: '1095712201757',
+    projectId: 'foodtrackingvii',
+    authDomain: 'foodtrackingvii.firebaseapp.com',
+    storageBucket: 'foodtrackingvii.firebasestorage.app',
+    measurementId: 'G-P3ZB3XQ1DJ',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB6KBMdU3dr0BUKnJYUU6pwtvvjoGvGqTI',
-    appId: '1:413421746127:android:b5cf56e1afc503db0e44ba',
-    messagingSenderId: '413421746127',
-    projectId: 'foodtracktester',
-    storageBucket: 'foodtracktester.firebasestorage.app',
+    apiKey: 'AIzaSyCVpDZ0xEcUQ_1tANspyViaMLjgNcpWbLY',
+    appId: '1:1095712201757:android:e804e559f073277c22faf4',
+    messagingSenderId: '1095712201757',
+    projectId: 'foodtrackingvii',
+    storageBucket: 'foodtrackingvii.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDfMoQyI3rlmAnSE2MbUPDmwhrhwcgMl5I',
-    appId: '1:413421746127:ios:77d0c1dfcfcebbbf0e44ba',
-    messagingSenderId: '413421746127',
-    projectId: 'foodtracktester',
-    storageBucket: 'foodtracktester.firebasestorage.app',
+    apiKey: 'AIzaSyAD_x-5RZpEDjzW_WHFzyhnUQ5tFMaEAFY',
+    appId: '1:1095712201757:ios:4b5d1611cd5a57be22faf4',
+    messagingSenderId: '1095712201757',
+    projectId: 'foodtrackingvii',
+    storageBucket: 'foodtrackingvii.firebasestorage.app',
     iosBundleId: 'com.example.foodtrackerFirebase',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDfMoQyI3rlmAnSE2MbUPDmwhrhwcgMl5I',
-    appId: '1:413421746127:ios:77d0c1dfcfcebbbf0e44ba',
-    messagingSenderId: '413421746127',
-    projectId: 'foodtracktester',
-    storageBucket: 'foodtracktester.firebasestorage.app',
+    apiKey: 'AIzaSyAD_x-5RZpEDjzW_WHFzyhnUQ5tFMaEAFY',
+    appId: '1:1095712201757:ios:4b5d1611cd5a57be22faf4',
+    messagingSenderId: '1095712201757',
+    projectId: 'foodtrackingvii',
+    storageBucket: 'foodtrackingvii.firebasestorage.app',
     iosBundleId: 'com.example.foodtrackerFirebase',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyAsVWoRgPwiPBXSDPeIgwalbI1JJxfSKi8',
-    appId: '1:413421746127:web:43dc0e39e2a84f4a0e44ba',
-    messagingSenderId: '413421746127',
-    projectId: 'foodtracktester',
-    authDomain: 'foodtracktester.firebaseapp.com',
-    storageBucket: 'foodtracktester.firebasestorage.app',
-    measurementId: 'G-KZ6Z27RME4',
+    apiKey: 'AIzaSyBJyWY0aGf1R4CZem4jgFJHD13JubSyPXg',
+    appId: '1:1095712201757:web:a50e906faf09443522faf4',
+    messagingSenderId: '1095712201757',
+    projectId: 'foodtrackingvii',
+    authDomain: 'foodtrackingvii.firebaseapp.com',
+    storageBucket: 'foodtrackingvii.firebasestorage.app',
+    measurementId: 'G-REDZMP0BTB',
   );
 
 }
