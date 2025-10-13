@@ -31,18 +31,218 @@ class _PostModalState extends State<PostModal> {
   final TextEditingController restaurantController = TextEditingController();
   final CloudinaryService _cloudinaryService = CloudinaryService();
   final DatabaseService databaseService = DatabaseService();
+  final FocusNode _restaurantFocusNode = FocusNode();
 
   Uint8List? _imageBytes;
   String? _imageName;
   int _rating = 0;
   bool _isLoading = false;
 
+  // Restaurant search variables
+  bool _showRestaurantSuggestions = false;
+  List<Map<String, dynamic>> _restaurantData = [];
+  List<Map<String, dynamic>> _filteredRestaurants = [];
+
   // Cloudinary Service
   final CloudinaryPublic _cloudinary = CloudinaryPublic(
-    'ddxgbymvn', // Your cloud name
-    'Cloudinary_Foodpost', // Your upload preset
+    'ddxgbymvn',
+    'Cloudinary_Foodpost',
     cache: false,
   );
+
+  @override
+  void initState() {
+    super.initState();
+    _restaurantFocusNode.addListener(_onRestaurantFocusChanged);
+    _loadRestaurantData();
+  }
+
+  @override
+  void dispose() {
+    _restaurantFocusNode.removeListener(_onRestaurantFocusChanged);
+    _restaurantFocusNode.dispose();
+    locationController.dispose();
+    descriptionController.dispose();
+    restaurantController.dispose();
+    super.dispose();
+  }
+
+  // Load restaurant data from Firestore
+  Future<void> _loadRestaurantData() async {
+    try {
+      _debugLog('Loading restaurant data from Firestore...');
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('locations')
+          .get();
+
+      List<Map<String, dynamic>> restaurants = [];
+
+      for (var doc in querySnapshot.docs) {
+        final data = doc.data();
+        final geoPoint = data['location'] as GeoPoint;
+
+        restaurants.add({
+          'id': doc.id,
+          'foodName': data['foodName'] ?? 'Unknown',
+          'foodCategory': data['foodCategory'] ?? 'Restaurant',
+          'foodDescription':
+              data['foodDescription'] ?? 'No description available',
+          'latitude': geoPoint.latitude,
+          'longitude': geoPoint.longitude,
+        });
+      }
+
+      setState(() {
+        _restaurantData = restaurants;
+        _filteredRestaurants = restaurants;
+      });
+      _debugLog('Loaded ${restaurants.length} restaurants from Firestore');
+    } catch (e) {
+      _debugLog('Error loading restaurant data: $e');
+    }
+  }
+
+  // Handle restaurant focus changes
+  void _onRestaurantFocusChanged() {
+    if (_restaurantFocusNode.hasFocus) {
+      setState(() {
+        _showRestaurantSuggestions = true;
+      });
+    } else {
+      // Delay hiding so taps on suggestion list can register before the list disappears
+      Future.delayed(const Duration(milliseconds: 150), () {
+        if (mounted && !_restaurantFocusNode.hasFocus) {
+          setState(() {
+            _showRestaurantSuggestions = false;
+          });
+        }
+      });
+    }
+  }
+
+  // Filter restaurants based on search text
+  void _filterRestaurants(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        _filteredRestaurants = _restaurantData;
+      });
+      return;
+    }
+
+    final filtered = _restaurantData.where((restaurant) {
+      final name = restaurant['foodName'].toString().toLowerCase();
+      final category = restaurant['foodCategory'].toString().toLowerCase();
+      final searchLower = query.toLowerCase();
+
+      return name.contains(searchLower) || category.contains(searchLower);
+    }).toList();
+
+    setState(() {
+      _filteredRestaurants = filtered;
+    });
+  }
+
+  // Select a restaurant from suggestions - fill restaurant only
+  void _selectRestaurant(Map<String, dynamic> restaurant) {
+    _debugLog('Selected restaurant: ${restaurant['foodName']}');
+
+    final name = restaurant['foodName'] ?? '';
+    restaurantController.text = name;
+    restaurantController.selection = TextSelection.collapsed(
+      offset: name.length,
+    );
+
+    setState(() {
+      _showRestaurantSuggestions = false;
+    });
+
+    // Hide keyboard and remove focus
+    _restaurantFocusNode.unfocus();
+
+    _debugLog('Auto-filled restaurant: ${restaurantController.text}');
+  }
+
+  // Build restaurant suggestions list
+  Widget _buildRestaurantSuggestions() {
+    if (!_showRestaurantSuggestions) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xff3a556e),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      constraints: const BoxConstraints(maxHeight: 200),
+      child: _filteredRestaurants.isEmpty
+          ? const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                'No restaurants found',
+                style: TextStyle(color: Colors.white70),
+              ),
+            )
+          : ListView.builder(
+              shrinkWrap: true,
+              padding: const EdgeInsets.all(8),
+              itemCount: _filteredRestaurants.length,
+              itemBuilder: (context, index) {
+                final restaurant = _filteredRestaurants[index];
+                return GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTapDown: (_) {
+                    _debugLog(
+                      'Tapped on restaurant: ${restaurant['foodName']}',
+                    );
+                    _selectRestaurant(restaurant);
+                  },
+                  child: Material(
+                    color: Colors.transparent,
+                    child: ListTile(
+                      leading: const Icon(
+                        Icons.restaurant,
+                        color: Colors.white70,
+                      ),
+                      title: Text(
+                        restaurant['foodName'],
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          color: Colors.white,
+                        ),
+                      ),
+                      subtitle: Text(
+                        restaurant['foodCategory'],
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.white70,
+                        ),
+                      ),
+                      trailing: const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 16,
+                        color: Colors.white70,
+                      ),
+                      // onTap intentionally omitted; onTapDown on parent captures early tap
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
 
   // Debug logging function
   void _debugLog(String message) {
@@ -70,9 +270,11 @@ class _PostModalState extends State<PostModal> {
       }
     } catch (e) {
       _debugLog('Error picking image: $e');
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error picking image: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error picking image: $e')));
+      }
     }
   }
 
@@ -85,13 +287,11 @@ class _PostModalState extends State<PostModal> {
     try {
       _debugLog('Starting image upload to Cloudinary');
 
-      // Use the CloudinaryService's uploadImageBytes method with timeout
       final uploadFuture = _cloudinaryService.uploadImageBytes(
         _imageBytes!,
-        folder: 'cloudinary_foodpost', // optional folder
+        folder: 'cloudinary_foodpost',
       );
 
-      // Apply timeout of 20 seconds
       final String imageUrl = await uploadFuture.timeout(
         const Duration(seconds: 20),
         onTimeout: () {
@@ -159,8 +359,6 @@ class _PostModalState extends State<PostModal> {
       _debugLog('Post data: ${postUser.toJson()}');
       await postsCollection.doc(postId).set(postUser.toJson());
 
-      // ✅ FIXED: You need to create DatabaseService instance
-
       await databaseService.createPostNotification(
         username: widget.currentUserName,
       );
@@ -173,7 +371,6 @@ class _PostModalState extends State<PostModal> {
   }
 
   Future<void> _createPost() async {
-    // Validate required fields
     if (descriptionController.text.trim().isEmpty) {
       _debugLog('Validation failed: Description is empty');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -197,12 +394,10 @@ class _PostModalState extends State<PostModal> {
     _debugLog('Starting post creation process');
 
     try {
-      // Step 1: Upload image to Cloudinary
       _debugLog('Step 1: Uploading image to Cloudinary');
       String? imageUrl = await _uploadImage();
       _debugLog('Image upload result: $imageUrl');
 
-      // If upload was cancelled due to timeout, stop here
       if (imageUrl == null) {
         _debugLog('Image upload failed or was cancelled');
         setState(() {
@@ -211,11 +406,9 @@ class _PostModalState extends State<PostModal> {
         return;
       }
 
-      // Step 2: Save to Firestore
       _debugLog('Step 2: Saving to Firestore');
       await _savePostToFirestore(imageUrl);
 
-      // Step 3: Success
       _debugLog('Step 3: Post created successfully');
 
       if (mounted) {
@@ -226,7 +419,6 @@ class _PostModalState extends State<PostModal> {
           ),
         );
 
-        // Wait a bit before closing to show success message
         await Future.delayed(const Duration(milliseconds: 500));
 
         Navigator.pop(context);
@@ -260,6 +452,7 @@ class _PostModalState extends State<PostModal> {
       _rating = 0;
       _imageBytes = null;
       _imageName = null;
+      _showRestaurantSuggestions = false;
     });
     _debugLog('Form reset');
   }
@@ -344,37 +537,50 @@ class _PostModalState extends State<PostModal> {
                       const SizedBox(height: 16),
                     ],
 
-                    // Restaurant Name Field
-                    TextField(
-                      controller: restaurantController,
-                      enabled: !_isLoading,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: "Restaurant Name",
-                        hintStyle: const TextStyle(color: Colors.white70),
-                        prefixIcon: const Icon(
-                          Icons.restaurant,
-                          color: Colors.white70,
-                        ),
-                        filled: true,
-                        fillColor: const Color(0xff3a556e),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xff45607f),
+                    // Restaurant Name Field with suggestions
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextField(
+                          controller: restaurantController,
+                          focusNode: _restaurantFocusNode,
+                          enabled: !_isLoading,
+                          style: const TextStyle(color: Colors.white),
+                          onChanged: _filterRestaurants,
+                          onTap: () {
+                            setState(() {
+                              _showRestaurantSuggestions = true;
+                            });
+                          },
+                          decoration: InputDecoration(
+                            hintText: "Restaurant Name",
+                            hintStyle: const TextStyle(color: Colors.white70),
+                            prefixIcon: const Icon(
+                              Icons.restaurant,
+                              color: Colors.white70,
+                            ),
+                            filled: true,
+                            fillColor: const Color(0xff3a556e),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color(0xff45607f),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color(0xff547792),
+                              ),
+                            ),
                           ),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(
-                            color: Color(0xff547792),
-                          ),
-                        ),
-                      ),
+                        _buildRestaurantSuggestions(),
+                      ],
                     ),
                     const SizedBox(height: 16),
 
@@ -409,7 +615,7 @@ class _PostModalState extends State<PostModal> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Location field
+                    // Location field (auto-filled when restaurant is selected)
                     TextField(
                       controller: locationController,
                       enabled: !_isLoading,
@@ -499,66 +705,81 @@ class _PostModalState extends State<PostModal> {
                     const SizedBox(height: 16),
 
                     // Debug info panel
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xff3a556e),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xff547792)),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Row(
-                            children: [
-                              Icon(
-                                Icons.bug_report,
-                                color: Colors.amber,
-                                size: 20,
-                              ),
-                              SizedBox(width: 8),
-                              Text(
-                                "Debug Info",
-                                style: TextStyle(
-                                  fontSize: 12,
+                    if (kDebugMode)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xff3a556e),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xff547792)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Row(
+                              children: [
+                                Icon(
+                                  Icons.bug_report,
                                   color: Colors.amber,
-                                  fontWeight: FontWeight.bold,
+                                  size: 20,
                                 ),
+                                SizedBox(width: 8),
+                                Text(
+                                  "Debug Info",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.amber,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              "Image: ${_imageBytes != null ? 'Selected' : 'Not selected'}",
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.white70,
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            "Image: ${_imageBytes != null ? 'Selected' : 'Not selected'}",
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.white70,
                             ),
-                          ),
-                          Text(
-                            "Rating: $_rating/5",
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.white70,
+                            Text(
+                              "Rating: $_rating/5",
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.white70,
+                              ),
                             ),
-                          ),
-                          Text(
-                            "Status: ${_isLoading ? 'Uploading...' : 'Ready'}",
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.white70,
+                            Text(
+                              "Status: ${_isLoading ? 'Uploading...' : 'Ready'}",
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.white70,
+                              ),
                             ),
-                          ),
-                          Text(
-                            "Storage: Cloudinary",
-                            style: const TextStyle(
-                              fontSize: 10,
-                              color: Colors.white70,
+                            Text(
+                              "Restaurants Loaded: ${_restaurantData.length}",
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.white70,
+                              ),
                             ),
-                          ),
-                        ],
+                            Text(
+                              "Restaurant Field: ${restaurantController.text}",
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.white70,
+                              ),
+                            ),
+                            Text(
+                              "Location Field: ${locationController.text}",
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -624,13 +845,5 @@ class _PostModalState extends State<PostModal> {
         );
       },
     );
-  }
-
-  @override
-  void dispose() {
-    locationController.dispose();
-    descriptionController.dispose();
-    restaurantController.dispose();
-    super.dispose();
   }
 }
