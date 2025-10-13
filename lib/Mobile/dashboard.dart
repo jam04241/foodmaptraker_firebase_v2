@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:foodtracker_firebase/Properties/dashboardAssets/ImageSlider.dart';
 import 'package:foodtracker_firebase/Properties/dashboardAssets/foodDescription.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class NavDashboardPage extends StatefulWidget {
   const NavDashboardPage({super.key});
@@ -10,6 +12,39 @@ class NavDashboardPage extends StatefulWidget {
 }
 
 class _NavDashboardPageState extends State<NavDashboardPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  String _userName = "User"; // Default value
+  String _userEmail = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final User? user = _auth.currentUser;
+      if (user != null) {
+        final userDoc = await _firestore
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        if (userDoc.exists) {
+          final userData = userDoc.data() as Map<String, dynamic>;
+          setState(() {
+            _userName = userData['userName'] ?? 'User';
+            _userEmail = userData['email'] ?? '';
+          });
+        }
+      }
+    } catch (e) {
+      print('Error loading user data: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,20 +61,20 @@ class _NavDashboardPageState extends State<NavDashboardPage> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  SizedBox(height: 4),
+                children: [
+                  const SizedBox(height: 4),
                   Text(
-                    "Stifin Tatel",
-                    style: TextStyle(
+                    _userName, // ✅ Dynamic username from Firebase
+                    style: const TextStyle(
                       fontFamily: 'Montserrat',
                       color: Colors.white,
                       fontSize: 30,
                     ),
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Text(
-                    "Welcome back 👋",
-                    style: TextStyle(
+                    _userEmail.isNotEmpty ? _userEmail : "Welcome back 👋",
+                    style: const TextStyle(
                       fontFamily: 'Montserrat',
                       color: Colors.white70,
                       fontSize: 14,
@@ -47,7 +82,6 @@ class _NavDashboardPageState extends State<NavDashboardPage> {
                   ),
                 ],
               ),
-
               Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
@@ -131,7 +165,6 @@ class _NavDashboardPageState extends State<NavDashboardPage> {
                   'Fresh greens with protein',
                   style: TextStyle(color: Colors.white70),
                 ),
-                // only the icon pushes the next page
                 trailing: IconButton(
                   icon: const Icon(
                     Icons.arrow_forward_ios,
@@ -147,7 +180,6 @@ class _NavDashboardPageState extends State<NavDashboardPage> {
                     );
                   },
                 ),
-                // no onTap here: tapping card DOES NOTHING
               ),
             ),
 

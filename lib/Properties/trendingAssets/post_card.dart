@@ -20,7 +20,7 @@ class PostCard extends StatelessWidget {
       margin: const EdgeInsets.only(top: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Color(0xff2f4a5d),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),

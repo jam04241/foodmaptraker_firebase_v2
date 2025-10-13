@@ -4,10 +4,20 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:foodtracker_firebase/model/Users.dart';
+import 'package:foodtracker_firebase/model/postUser.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PostModal extends StatefulWidget {
   final TextEditingController postController;
-  const PostModal({super.key, required this.postController});
+  final String currentUserId; // ✅ DECLARE AS CLASS FIELDS
+  final String currentUserName; // ✅ DECLARE AS CLASS FIELDS
+
+  const PostModal({
+    super.key,
+    required this.postController,
+    required this.currentUserId,
+    required this.currentUserName,
+  });
 
   @override
   State<PostModal> createState() => _PostModalState();
@@ -87,6 +97,7 @@ class _PostModalState extends State<PostModal> {
     }
   }
 
+  // Then in your _savePostToFirestore method, use these parameters:
   Future<void> _savePostToFirestore(String imageUrl) async {
     try {
       _debugLog('Starting Firestore save operation');
@@ -101,8 +112,9 @@ class _PostModalState extends State<PostModal> {
         description: descriptionController.text.trim(),
         location: locationController.text.trim(),
         rates: _rating.toString(),
-        images: imageUrl ?? '',
-        userId: 'current_user_id', // TODO: Replace with actual user ID
+        images: imageUrl,
+        userId: widget.currentUserId, // ✅ USE THE PASSED USER ID
+        userName: widget.currentUserName, // ✅ USE THE PASSED USERNAME
         restaurantName: restaurantController.text.trim().isEmpty
             ? 'Restaurant'
             : restaurantController.text.trim(),
@@ -110,10 +122,10 @@ class _PostModalState extends State<PostModal> {
         isLiked: false,
         hearts: 0,
         likedBy: [],
+        commentCount: 0,
       );
 
       _debugLog('Post data: ${postUser.toJson()}');
-
       await postsCollection.doc(postId).set(postUser.toJson());
       _debugLog('Post successfully saved to Firestore');
     } catch (e) {
@@ -215,7 +227,7 @@ class _PostModalState extends State<PostModal> {
       builder: (context, scrollController) {
         return Container(
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: Color(0xff2f4a5d), // ✅ Changed to dark blue
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(
@@ -230,10 +242,14 @@ class _PostModalState extends State<PostModal> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
+                        color: Colors.white, // ✅ White text
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close),
+                      icon: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                      ), // ✅ White icon
                       onPressed: _isLoading
                           ? null
                           : () => Navigator.pop(context),
@@ -288,14 +304,35 @@ class _PostModalState extends State<PostModal> {
                     TextField(
                       controller: restaurantController,
                       enabled: !_isLoading,
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ), // ✅ White text
                       decoration: InputDecoration(
                         hintText: "Restaurant Name",
-                        prefixIcon: const Icon(Icons.restaurant),
+                        hintStyle: const TextStyle(
+                          color: Colors.white70,
+                        ), // ✅ Hint color
+                        prefixIcon: const Icon(
+                          Icons.restaurant,
+                          color: Colors.white70,
+                        ),
                         filled: true,
-                        fillColor: const Color(0xfff0f0f0),
+                        fillColor: const Color(0xff3a556e), // ✅ Darker blue
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xff45607f),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xff547792),
+                          ),
                         ),
                       ),
                     ),
@@ -306,13 +343,31 @@ class _PostModalState extends State<PostModal> {
                       controller: descriptionController,
                       maxLines: 5,
                       enabled: !_isLoading,
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ), // ✅ White text
                       decoration: InputDecoration(
                         hintText: "What's on your mind?",
+                        hintStyle: const TextStyle(
+                          color: Colors.white70,
+                        ), // ✅ Hint color
                         filled: true,
-                        fillColor: const Color(0xfff0f0f0),
+                        fillColor: const Color(0xff3a556e), // ✅ Darker blue
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xff45607f),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xff547792),
+                          ),
                         ),
                       ),
                     ),
@@ -322,14 +377,35 @@ class _PostModalState extends State<PostModal> {
                     TextField(
                       controller: locationController,
                       enabled: !_isLoading,
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ), // ✅ White text
                       decoration: InputDecoration(
                         hintText: "Add Location",
-                        prefixIcon: const Icon(Icons.location_on),
+                        hintStyle: const TextStyle(
+                          color: Colors.white70,
+                        ), // ✅ Hint color
+                        prefixIcon: const Icon(
+                          Icons.location_on,
+                          color: Colors.white70,
+                        ),
                         filled: true,
-                        fillColor: const Color(0xfff0f0f0),
+                        fillColor: const Color(0xff3a556e), // ✅ Darker blue
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xff45607f),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xff547792),
+                          ),
                         ),
                       ),
                     ),
@@ -338,7 +414,10 @@ class _PostModalState extends State<PostModal> {
                     // Ratings input
                     Row(
                       children: [
-                        const Text("Rate:", style: TextStyle(fontSize: 16)),
+                        const Text(
+                          "Rate:",
+                          style: TextStyle(fontSize: 16, color: Colors.white),
+                        ), // ✅ White text
                         const SizedBox(width: 10),
                         Row(
                           children: List.generate(5, (index) {
@@ -377,9 +456,12 @@ class _PostModalState extends State<PostModal> {
                       icon: const Icon(Icons.image),
                       label: Text(
                         _imageBytes == null ? "Add Photo" : "Change Photo",
+                        style: const TextStyle(color: Colors.white),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF213448),
+                        backgroundColor: const Color(
+                          0xff547792,
+                        ), // ✅ Accent blue
                         foregroundColor: Colors.white,
                         minimumSize: const Size(double.infinity, 50),
                       ),
@@ -390,8 +472,9 @@ class _PostModalState extends State<PostModal> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.orange[50],
+                        color: const Color(0xff3a556e), // ✅ Darker blue
                         borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xff547792)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,7 +483,7 @@ class _PostModalState extends State<PostModal> {
                             children: [
                               Icon(
                                 Icons.bug_report,
-                                color: Colors.orange,
+                                color: Colors.amber,
                                 size: 20,
                               ),
                               SizedBox(width: 8),
@@ -408,7 +491,7 @@ class _PostModalState extends State<PostModal> {
                                 "Debug Info",
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: Colors.orange,
+                                  color: Colors.amber,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -417,15 +500,24 @@ class _PostModalState extends State<PostModal> {
                           const SizedBox(height: 4),
                           Text(
                             "Image: ${_imageBytes != null ? 'Selected' : 'Not selected'}",
-                            style: const TextStyle(fontSize: 10),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.white70,
+                            ),
                           ),
                           Text(
                             "Rating: $_rating/5",
-                            style: const TextStyle(fontSize: 10),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.white70,
+                            ),
                           ),
                           Text(
                             "Status: ${_isLoading ? 'Uploading...' : 'Ready'}",
-                            style: const TextStyle(fontSize: 10),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.white70,
+                            ),
                           ),
                         ],
                       ),
@@ -441,7 +533,9 @@ class _PostModalState extends State<PostModal> {
                   height: 50,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: _isLoading ? Colors.grey : Colors.green,
+                      backgroundColor: _isLoading
+                          ? const Color(0xff3a556e)
+                          : const Color(0xff547792), // ✅ Accent blue
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),

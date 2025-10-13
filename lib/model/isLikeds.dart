@@ -4,7 +4,7 @@ class HeartReaction {
   final String id;
   final String postId;
   final String userId;
-  final String userDisplayName;
+  final String userName;
   final String? userPhotoURL;
   final Timestamp heartedAt;
 
@@ -12,7 +12,7 @@ class HeartReaction {
     required this.id,
     required this.postId,
     required this.userId,
-    required this.userDisplayName,
+    required this.userName,
     this.userPhotoURL,
     required this.heartedAt,
   });
@@ -21,7 +21,7 @@ class HeartReaction {
     'id': id,
     'postId': postId,
     'userId': userId,
-    'userDisplayName': userDisplayName,
+    'userName': userName,
     'userPhotoURL': userPhotoURL,
     'heartedAt': heartedAt,
   };
@@ -30,7 +30,7 @@ class HeartReaction {
     id: json['id'] ?? '',
     postId: json['postId'] ?? '',
     userId: json['userId'] ?? '',
-    userDisplayName: json['userDisplayName'] ?? 'User',
+    userName: json['userName'] ?? 'User',
     userPhotoURL: json['userPhotoURL'],
     heartedAt: json['heartedAt'] ?? Timestamp.now(),
   );

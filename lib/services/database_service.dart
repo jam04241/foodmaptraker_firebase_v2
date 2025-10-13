@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:foodtracker_firebase/model/UserComment.dart';
 import 'package:foodtracker_firebase/model/Users.dart';
+import 'package:foodtracker_firebase/model/postUser.dart';
 
 class DatabaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -83,7 +84,7 @@ class DatabaseService {
         id: commentId,
         postId: comment.postId,
         userId: comment.userId,
-        userDisplayName: comment.userDisplayName,
+        userName: comment.userName,
         userPhotoURL: comment.userPhotoURL,
         comment: comment.comment,
         rating: comment.rating,
