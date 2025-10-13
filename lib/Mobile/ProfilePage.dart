@@ -272,6 +272,20 @@ class _NavProfilePageState extends State<NavProfilePage> {
                             textAlign: TextAlign.center,
                           ),
                         ),
+
+                        // Info Text
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            "This will update your display name across the app",
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                              fontStyle: FontStyle.italic,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -341,11 +355,37 @@ class _NavProfilePageState extends State<NavProfilePage> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                SizedBox(
+                // Profile Image
+                Container(
                   height: 120,
                   width: 120,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 3),
+                  ),
                   child: ClipOval(
-                    child: Image.asset('images/doctor.png', fit: BoxFit.cover),
+                    child:
+                        _profileImageUrl != null && _profileImageUrl!.isNotEmpty
+                        ? Image.network(
+                            _profileImageUrl!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                'images/doctor.png',
+                                fit: BoxFit.cover,
+                              );
+                            },
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Container(
+                                color: Colors.grey[300],
+                                child: const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              );
+                            },
+                          )
+                        : Image.asset('images/doctor.png', fit: BoxFit.cover),
                   ),
                 ),
                 const SizedBox(width: 20),
@@ -361,6 +401,8 @@ class _NavProfilePageState extends State<NavProfilePage> {
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 8),
                       Text(
@@ -481,7 +523,7 @@ class _NavProfilePageState extends State<NavProfilePage> {
                   size: 28,
                 ),
                 title: const Text(
-                  'Posted',
+                  'My Posts',
                   style: TextStyle(
                     color: Colors.white,
                     fontFamily: 'Montserrat',
@@ -544,6 +586,19 @@ class _NavProfilePageState extends State<NavProfilePage> {
                       builder: (context) => const LoginDesign(),
                     ),
                   );
+
+                  if (shouldLogout == true) {
+                    // Perform Firebase logout
+                    await FirebaseAuth.instance.signOut();
+
+                    // Navigate to Login screen after logout
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginDesign(),
+                      ),
+                    );
+                  }
                 },
               ),
             ),
