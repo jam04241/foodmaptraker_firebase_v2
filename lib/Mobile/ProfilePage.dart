@@ -345,7 +345,10 @@ class _NavProfilePageState extends State<NavProfilePage> {
                   height: 120,
                   width: 120,
                   child: ClipOval(
-                    child: Image.asset('images/doctor.png', fit: BoxFit.cover),
+                    child: Image.asset(
+                      'images/defaultProfile.png',
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 20),

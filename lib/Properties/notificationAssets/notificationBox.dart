@@ -111,29 +111,29 @@ class NotificationBox extends StatelessWidget {
             ),
           ],
         ),
-        trailing: PopupMenuButton<String>(
-          icon: const Icon(Icons.more_horiz, color: Colors.white),
-          color: const Color(0xff2f4a5d),
-          onSelected: (value) {
-            if (value == 'delete') {
-              // TODO: Implement delete functionality
-              // You can use notificationId to delete from Firestore
-              _showDeleteConfirmation(context);
-            }
-          },
-          itemBuilder: (BuildContext context) => [
-            PopupMenuItem<String>(
-              value: 'delete',
-              child: Row(
-                children: const [
-                  Icon(Icons.delete, color: Colors.red, size: 20),
-                  SizedBox(width: 8),
-                  Text('Delete', style: TextStyle(color: Colors.white)),
-                ],
-              ),
-            ),
-          ],
-        ),
+        // trailing: PopupMenuButton<String>(
+        //   icon: const Icon(Icons.more_horiz, color: Colors.white),
+        //   color: const Color(0xff2f4a5d),
+        //   onSelected: (value) {
+        //     if (value == 'delete') {
+        //       // TODO: Implement delete functionality
+        //       // You can use notificationId to delete from Firestore
+        //       _showDeleteConfirmation(context);
+        //     }
+        //   },
+        //   itemBuilder: (BuildContext context) => [
+        //     PopupMenuItem<String>(
+        //       value: 'delete',
+        //       child: Row(
+        //         children: const [
+        //           Icon(Icons.delete, color: Colors.red, size: 20),
+        //           SizedBox(width: 8),
+        //           Text('Delete', style: TextStyle(color: Colors.white)),
+        //         ],
+        //       ),
+        //     ),
+        //   ],
+        // ),
       ),
     );
   }

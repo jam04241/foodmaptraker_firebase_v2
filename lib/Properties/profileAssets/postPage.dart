@@ -278,37 +278,46 @@ class _MyPostsPageState extends State<PostPage> {
   }
 
   Widget _buildEmptyState() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 150,
-            height: 150,
-            decoration: BoxDecoration(
-              color: const Color(0xff2f4a5d).withOpacity(0.5),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.restaurant_menu, size: 60, color: Colors.white70),
+    return SizedBox.expand(
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  color: const Color(0xff2f4a5d).withOpacity(0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.restaurant_menu,
+                  size: 60,
+                  color: Colors.white70,
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'No Posts Yet',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "You haven't created any posts yet.",
+                style: TextStyle(fontSize: 16, color: Colors.grey),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-          const SizedBox(height: 24),
-          const Text(
-            'No Posts Yet',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'You haven\'t created any posts yet.',
-            style: TextStyle(fontSize: 16, color: Colors.grey[400]),
-            textAlign: TextAlign.center,
-          ),
-        ],
+        ),
       ),
     );
   }

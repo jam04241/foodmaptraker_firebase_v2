@@ -20,10 +20,14 @@ class PostCard extends StatelessWidget {
       margin: const EdgeInsets.only(top: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Color(0xff2f4a5d),
+        color: const Color(0xff2f4a5d),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4)),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
@@ -33,49 +37,67 @@ class PostCard extends StatelessWidget {
           Row(
             children: [
               CircleAvatar(
-                radius: 24,
+                radius: 20,
+                backgroundColor: const Color(0xff3a556e),
                 backgroundImage: NetworkImage(post.profileImage),
               ),
               const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    post.username,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                  Text(
-                    post.location,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  Text(
-                    post.restaurant,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    post.timeAgo,
-                    style: const TextStyle(fontSize: 11, color: Colors.grey),
-                  ),
-                ],
-              ),
-              const Spacer(),
-
-              // ❤️ Heart button
-              InkWell(
-                onTap: onHeartTap,
-                child: Row(
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.favorite, size: 20, color: Colors.red),
-                    const SizedBox(width: 4),
+                    Row(
+                      children: [
+                        Text(
+                          post.username,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            "Parody",
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.white70,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     Text(
-                      "${post.hearts}",
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                      post.location,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.white70,
+                      ),
+                    ),
+                    Text(
+                      post.restaurant,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      post.timeAgo,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.white54,
+                      ),
                     ),
                   ],
                 ),
@@ -85,13 +107,30 @@ class PostCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
+          // Post Content
+          Text(
+            post.review,
+            style: const TextStyle(
+              fontSize: 15,
+              color: Colors.white,
+              height: 1.4,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
           // Post Image
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.network(post.imageUrl, fit: BoxFit.cover),
+            child: Image.network(
+              post.imageUrl,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: 200,
+            ),
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
 
           // Rating
           Row(
@@ -105,34 +144,92 @@ class PostCard extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 post.rating.toString(),
-                style: const TextStyle(fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
               ),
             ],
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
 
-          // Review Text
-          Text(post.review),
+          // Twitter-style Action Buttons Row
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Comment Button
+                _buildActionButton(
+                  icon: Icons.chat_bubble_outline,
+                  count: "203", // You can replace with actual comment count
+                  onTap: onCommentTap,
+                  iconColor: Colors.white70,
+                ),
 
-          const SizedBox(height: 8),
+                // Heart Button
+                _buildActionButton(
+                  icon: Icons.favorite,
+                  count: "${post.hearts}",
+                  onTap: onHeartTap,
+                  iconColor: Colors.red,
+                  isHeart: true,
+                ),
 
-          // "What's on your mind" below picture
-          InkWell(
-            onTap: onCommentTap,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text(
-                "What's on your mind?",
-                style: TextStyle(color: Colors.grey, fontSize: 13),
-              ),
+                // Retweet Button (Additional)
+                _buildActionButton(
+                  icon: Icons.repeat,
+                  count: "1.5K",
+                  onTap: () {},
+                  iconColor: Colors.white70,
+                ),
+
+                // Share Button (Additional)
+                _buildActionButton(
+                  icon: Icons.share,
+                  count: "32K",
+                  onTap: () {},
+                  iconColor: Colors.white70,
+                ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String count,
+    required VoidCallback onTap,
+    required Color iconColor,
+    bool isHeart = false,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: iconColor, size: 18),
+            const SizedBox(width: 6),
+            Text(
+              count,
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
