@@ -161,7 +161,8 @@ class _NavNotificationsPageState extends State<NavNotificationsPage> {
                     final data = notification.data() as Map<String, dynamic>;
 
                     return NotificationBox(
-                      profileImage: "images/profile.png", // Default image
+                      profileImage:
+                          'images/defaultProfile.png', // Default image
                       username: data['username'] ?? 'User',
                       activity: data['message'] ?? 'New activity',
                       timestamp: getTimeAgo(data['createAt'] as Timestamp),

@@ -705,81 +705,81 @@ class _PostModalState extends State<PostModal> {
                     const SizedBox(height: 16),
 
                     // Debug info panel
-                    if (kDebugMode)
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xff3a556e),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xff547792)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Row(
-                              children: [
-                                Icon(
-                                  Icons.bug_report,
-                                  color: Colors.amber,
-                                  size: 20,
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  "Debug Info",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.amber,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "Image: ${_imageBytes != null ? 'Selected' : 'Not selected'}",
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.white70,
-                              ),
-                            ),
-                            Text(
-                              "Rating: $_rating/5",
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.white70,
-                              ),
-                            ),
-                            Text(
-                              "Status: ${_isLoading ? 'Uploading...' : 'Ready'}",
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.white70,
-                              ),
-                            ),
-                            Text(
-                              "Restaurants Loaded: ${_restaurantData.length}",
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.white70,
-                              ),
-                            ),
-                            Text(
-                              "Restaurant Field: ${restaurantController.text}",
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.white70,
-                              ),
-                            ),
-                            Text(
-                              "Location Field: ${locationController.text}",
-                              style: const TextStyle(
-                                fontSize: 10,
-                                color: Colors.white70,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    // if (kDebugMode)
+                    //   Container(
+                    //     padding: const EdgeInsets.all(12),
+                    //     decoration: BoxDecoration(
+                    //       color: const Color(0xff3a556e),
+                    //       borderRadius: BorderRadius.circular(12),
+                    //       border: Border.all(color: const Color(0xff547792)),
+                    //     ),
+                    //     child: Column(
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       children: [
+                    //         const Row(
+                    //           children: [
+                    //             Icon(
+                    //               Icons.bug_report,
+                    //               color: Colors.amber,
+                    //               size: 20,
+                    //             ),
+                    //             SizedBox(width: 8),
+                    //             Text(
+                    //               "Debug Info",
+                    //               style: TextStyle(
+                    //                 fontSize: 12,
+                    //                 color: Colors.amber,
+                    //                 fontWeight: FontWeight.bold,
+                    //               ),
+                    //             ),
+                    //           ],
+                    //         ),
+                    //         const SizedBox(height: 4),
+                    //         Text(
+                    //           "Image: ${_imageBytes != null ? 'Selected' : 'Not selected'}",
+                    //           style: const TextStyle(
+                    //             fontSize: 10,
+                    //             color: Colors.white70,
+                    //           ),
+                    //         ),
+                    //         Text(
+                    //           "Rating: $_rating/5",
+                    //           style: const TextStyle(
+                    //             fontSize: 10,
+                    //             color: Colors.white70,
+                    //           ),
+                    //         ),
+                    //         Text(
+                    //           "Status: ${_isLoading ? 'Uploading...' : 'Ready'}",
+                    //           style: const TextStyle(
+                    //             fontSize: 10,
+                    //             color: Colors.white70,
+                    //           ),
+                    //         ),
+                    //         Text(
+                    //           "Restaurants Loaded: ${_restaurantData.length}",
+                    //           style: const TextStyle(
+                    //             fontSize: 10,
+                    //             color: Colors.white70,
+                    //           ),
+                    //         ),
+                    //         Text(
+                    //           "Restaurant Field: ${restaurantController.text}",
+                    //           style: const TextStyle(
+                    //             fontSize: 10,
+                    //             color: Colors.white70,
+                    //           ),
+                    //         ),
+                    //         Text(
+                    //           "Location Field: ${locationController.text}",
+                    //           style: const TextStyle(
+                    //             fontSize: 10,
+                    //             color: Colors.white70,
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
                   ],
                 ),
               ),
@@ -826,10 +826,10 @@ class _PostModalState extends State<PostModal> {
                         : const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.cloud_upload, color: Colors.white),
+                              Icon(Icons.post_add, color: Colors.white),
                               SizedBox(width: 8),
                               Text(
-                                "Post to Cloudinary",
+                                "Upload Post",
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,

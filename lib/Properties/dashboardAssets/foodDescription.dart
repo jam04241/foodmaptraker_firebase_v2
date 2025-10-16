@@ -32,33 +32,27 @@ class _FooddescriptionState extends State<Fooddescription> {
           return Stream.value([]);
         })
         .map(
-          (snapshot) => snapshot.docs.map((doc) {
-            try {
-              final data = doc.data() as Map<String, dynamic>;
-              return Comment(
-                id: doc.id,
-                postId: data['postId'] ?? '',
-                userId: data['userId'] ?? '',
-                userName: data['userName'] ?? 'User',
-                userPhotoURL: data['userPhotoURL'],
-                comment: data['comment'] ?? '',
-                rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
-                timestamp: data['timestamp'] ?? Timestamp.now(),
-              );
-            } catch (e) {
-              print('Error parsing comment: $e');
-              return Comment(
-                id: doc.id,
-                postId: '',
-                userId: '',
-                userName: 'User',
-                userPhotoURL: '',
-                comment: 'Error loading comment',
-                rating: 0.0,
-                timestamp: Timestamp.now(),
-              );
-            }
-          }).toList(),
+          (snapshot) => snapshot.docs
+              .map((doc) {
+                try {
+                  final data = doc.data() as Map<String, dynamic>;
+                  return Comment(
+                    id: doc.id,
+                    postId: data['postId'] ?? '',
+                    userId: data['userId'] ?? '',
+                    userName: data['userName'] ?? 'User',
+                    userPhotoURL: data['userPhotoURL'],
+                    comment: data['comment'] ?? '',
+                    rating: (data['rating'] as num?)?.toDouble() ?? 0.0,
+                    timestamp: data['timestamp'] ?? Timestamp.now(),
+                  );
+                } catch (e) {
+                  print('Error parsing comment: $e');
+                  return null;
+                }
+              })
+              .whereType<Comment>()
+              .toList(),
         );
   }
 
@@ -133,6 +127,7 @@ class _FooddescriptionState extends State<Fooddescription> {
     final post = widget.post;
 
     return Scaffold(
+      backgroundColor: const Color(0xff213448),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,11 +149,17 @@ class _FooddescriptionState extends State<Fooddescription> {
                 Positioned(
                   top: 15,
                   left: 16,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.5),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
                   ),
                 ),
 
@@ -190,7 +191,7 @@ class _FooddescriptionState extends State<Fooddescription> {
                             fontFamily: 'Montserrat',
                             fontSize: 24,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xff213448),
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -208,7 +209,7 @@ class _FooddescriptionState extends State<Fooddescription> {
                     style: const TextStyle(
                       fontFamily: 'Montserrat',
                       fontSize: 16,
-                      color: Colors.black54,
+                      color: Colors.white70,
                     ),
                   ),
                 ],
@@ -227,7 +228,7 @@ class _FooddescriptionState extends State<Fooddescription> {
                 style: const TextStyle(
                   fontFamily: 'Montserrat',
                   fontSize: 14,
-                  color: Colors.black87,
+                  color: Colors.white70,
                 ),
               ),
             ),
@@ -237,60 +238,70 @@ class _FooddescriptionState extends State<Fooddescription> {
             // Stats Section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Colors.amber, size: 20),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${double.tryParse(post.rates)?.toStringAsFixed(1) ?? '0.0'}',
-                        style: const TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xff2f4a5d),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.star, color: Colors.amber, size: 20),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${double.tryParse(post.rates)?.toStringAsFixed(1) ?? '0.0'}',
+                          style: const TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
 
-                  Row(
-                    children: [
-                      const Icon(Icons.favorite, color: Colors.red, size: 20),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${post.hearts} likes',
-                        style: const TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontSize: 16,
-                          color: Colors.black54,
+                    Row(
+                      children: [
+                        const Icon(Icons.favorite, color: Colors.red, size: 20),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${post.hearts} likes',
+                          style: const TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 16,
+                            color: Colors.white70,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
 
-                  Row(
-                    children: [
-                      const Icon(Icons.person, color: Colors.grey, size: 20),
-                      const SizedBox(width: 4),
-                      Text(
-                        post.userName,
-                        style: const TextStyle(
-                          fontFamily: 'Montserrat',
-                          fontSize: 14,
-                          color: Colors.black54,
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.person,
+                          color: Colors.white70,
+                          size: 20,
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        const SizedBox(width: 4),
+                        Text(
+                          post.userName,
+                          style: const TextStyle(
+                            fontFamily: 'Montserrat',
+                            fontSize: 14,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
 
             const SizedBox(height: 20),
-            const Divider(color: Colors.grey),
 
             if (isRecommended) _buildRecommendationHighlight(),
 
@@ -307,7 +318,7 @@ class _FooddescriptionState extends State<Fooddescription> {
                       fontFamily: 'Montserrat',
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xff213448),
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -324,13 +335,13 @@ class _FooddescriptionState extends State<Fooddescription> {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xff213448),
+                          color: Colors.amber,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           '$commentCount',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Colors.black,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                           ),
@@ -391,12 +402,12 @@ class _FooddescriptionState extends State<Fooddescription> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey.shade300, width: 1.2),
+        color: const Color(0xff2f4a5d),
+        border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.2),
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.3),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -408,7 +419,7 @@ class _FooddescriptionState extends State<Fooddescription> {
           // User Avatar
           CircleAvatar(
             radius: 20,
-            backgroundColor: const Color(0xffdbe7c9),
+            backgroundColor: const Color(0xff3a556e),
             child:
                 comment.userPhotoURL != null && comment.userPhotoURL!.isNotEmpty
                 ? ClipOval(
@@ -418,11 +429,11 @@ class _FooddescriptionState extends State<Fooddescription> {
                       height: 36,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.person, color: Colors.grey);
+                        return const Icon(Icons.person, color: Colors.white70);
                       },
                     ),
                   )
-                : const Icon(Icons.person, color: Colors.grey),
+                : const Icon(Icons.person, color: Colors.white70),
           ),
           const SizedBox(width: 12),
 
@@ -440,7 +451,7 @@ class _FooddescriptionState extends State<Fooddescription> {
                         fontFamily: 'Montserrat',
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
-                        color: Color(0xff213448),
+                        color: Colors.white,
                       ),
                     ),
                     const Spacer(),
@@ -451,7 +462,7 @@ class _FooddescriptionState extends State<Fooddescription> {
                         comment.rating.toStringAsFixed(1),
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Colors.grey,
+                          color: Colors.amber,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -466,7 +477,7 @@ class _FooddescriptionState extends State<Fooddescription> {
                   style: const TextStyle(
                     fontFamily: 'Montserrat',
                     fontSize: 14,
-                    color: Colors.black87,
+                    color: Colors.white70,
                   ),
                 ),
 
@@ -477,7 +488,7 @@ class _FooddescriptionState extends State<Fooddescription> {
                   style: const TextStyle(
                     fontFamily: 'Montserrat',
                     fontSize: 11,
-                    color: Colors.grey,
+                    color: Colors.white54,
                   ),
                 ),
               ],
@@ -492,16 +503,16 @@ class _FooddescriptionState extends State<Fooddescription> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.orange[50],
+        color: const Color(0xff2f4a5d),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.orange[300]!),
+        border: Border.all(color: Colors.amber),
       ),
       child: Column(
         children: [
           const Icon(
             Icons.build_circle_outlined,
             size: 50,
-            color: Colors.orange,
+            color: Colors.amber,
           ),
           const SizedBox(height: 10),
           const Text(
@@ -509,7 +520,7 @@ class _FooddescriptionState extends State<Fooddescription> {
             style: TextStyle(
               fontFamily: 'Montserrat',
               fontSize: 16,
-              color: Colors.orange,
+              color: Colors.amber,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -520,21 +531,29 @@ class _FooddescriptionState extends State<Fooddescription> {
             style: TextStyle(
               fontFamily: 'Montserrat',
               fontSize: 14,
-              color: Colors.orange,
+              color: Colors.white70,
             ),
           ),
           const SizedBox(height: 12),
           if (_isIndexCreating) ...[
-            const CircularProgressIndicator(),
+            const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+            ),
             const SizedBox(height: 10),
-            const Text('Setting up index...'),
+            const Text(
+              'Setting up index...',
+              style: TextStyle(color: Colors.white70),
+            ),
           ] else ...[
             ElevatedButton(
               onPressed: _createIndex,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber,
+                foregroundColor: Colors.black,
+              ),
               child: const Text(
                 'Create Index',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -545,7 +564,7 @@ class _FooddescriptionState extends State<Fooddescription> {
             style: TextStyle(
               fontFamily: 'Montserrat',
               fontSize: 12,
-              color: Colors.grey,
+              color: Colors.white54,
             ),
           ),
         ],
@@ -557,20 +576,20 @@ class _FooddescriptionState extends State<Fooddescription> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: const Color(0xff2f4a5d),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
       ),
       child: Column(
         children: [
-          Icon(Icons.chat_bubble_outline, size: 50, color: Colors.grey[400]),
+          Icon(Icons.chat_bubble_outline, size: 50, color: Colors.white54),
           const SizedBox(height: 10),
           const Text(
             'No comments yet',
             style: TextStyle(
               fontFamily: 'Montserrat',
               fontSize: 16,
-              color: Colors.grey,
+              color: Colors.white,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -581,7 +600,7 @@ class _FooddescriptionState extends State<Fooddescription> {
             style: TextStyle(
               fontFamily: 'Montserrat',
               fontSize: 14,
-              color: Colors.grey,
+              color: Colors.white70,
             ),
           ),
         ],
@@ -593,20 +612,22 @@ class _FooddescriptionState extends State<Fooddescription> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: const Color(0xff2f4a5d),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
       ),
       child: const Column(
         children: [
-          CircularProgressIndicator(),
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+          ),
           SizedBox(height: 10),
           Text(
             'Loading comments...',
             style: TextStyle(
               fontFamily: 'Montserrat',
               fontSize: 14,
-              color: Colors.grey,
+              color: Colors.white70,
             ),
           ),
         ],
@@ -712,7 +733,7 @@ class _FooddescriptionState extends State<Fooddescription> {
                     fontFamily: 'Montserrat',
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.amber.shade800,
+                    color: Colors.amber.shade300,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -721,7 +742,7 @@ class _FooddescriptionState extends State<Fooddescription> {
                   style: const TextStyle(
                     fontFamily: 'Montserrat',
                     fontSize: 14,
-                    color: Colors.black87,
+                    color: Colors.white70,
                   ),
                 ),
               ],
@@ -736,15 +757,15 @@ class _FooddescriptionState extends State<Fooddescription> {
     return Container(
       height: 300,
       width: double.infinity,
-      color: Colors.grey[300],
-      child: const Column(
+      color: const Color(0xff2f4a5d),
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.restaurant, size: 60, color: Colors.grey),
-          SizedBox(height: 8),
-          Text(
+          const Icon(Icons.restaurant, size: 60, color: Colors.white54),
+          const SizedBox(height: 8),
+          const Text(
             'No Image Available',
-            style: TextStyle(color: Colors.grey, fontSize: 16),
+            style: TextStyle(color: Colors.white54, fontSize: 16),
           ),
         ],
       ),
